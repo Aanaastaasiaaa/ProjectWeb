@@ -3,384 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pizza Roma - Настоящая итальянская пицца</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Подключение шрифта Montserrat -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>PizzaMania - Лучшая пицца в городе</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<!-- Навигация -->
-<nav>
-    <div class="nav-container">
-        <div class="logo">
-            <i class="fas fa-pizza-slice"></i>
-            Pizza Roma
-        </div>
+<!-- Navigation -->
+<nav class="navbar">
+    <div class="container nav-container">
+        <a href="#" class="logo">Pizza<span>Mania</span></a>
 
-        <ul class="desktop-menu">
-            <li><a href="#home">Главная</a></li>
-            <li class="dropdown">
-                <a href="#menu">Меню</a>
-                <div class="dropdown-content">
-                    <a href="#pizza-classic">Классические</a>
-                    <a href="#pizza-special">Фирменные</a>
-                    <a href="#pizza-spicy">Острые</a>
-                    <a href="#desserts">Десерты</a>
-                </div>
+        <!-- Десктопное меню - горизонтальное -->
+        <ul class="nav-menu desktop-menu">
+            <li class="nav-item"><a href="#home" class="nav-link">Главная</a></li>
+
+            <li class="nav-item dropdown">
+                <a href="#menu" class="nav-link">Меню ▼</a>
+                <ul class="dropdown-menu">
+                    <li><a href="#pizza">Пицца</a></li>
+                    <li><a href="#pasta">Паста</a></li>
+                    <li><a href="#salads">Салаты</a></li>
+                    <li><a href="#drinks">Напитки</a></li>
+                    <li><a href="#desserts">Десерты</a></li>
+                </ul>
             </li>
-            <li><a href="#about">О нас</a></li>
-            <li><a href="#delivery">Доставка</a></li>
-            <li>
-                <button class="nav-contacts-button" onclick="toggleContacts()">
-                    Контакты
-                    <div class="contact-info">
-                        <div class="contact-item">
-                            <i class="fas fa-phone"></i>
-                            <span>+7 (918) 123-45-67</span>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fas fa-envelope"></i>
-                            <span>pizza.roma@mail.ru</span>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>г. Краснодар, ул. Итальянская, 15</span>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fas fa-clock"></i>
-                            <span>10:00-23:00 ежедневно</span>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fas fa-truck"></i>
-                            <span>Доставка: 11:00-22:30</span>
-                        </div>
-                    </div>
-                </button>
-            </li>
-            <li class="cart-icon" onclick="toggleCart()">
-                <i class="fas fa-shopping-cart"></i>
-                <span class="cart-count">0</span>
-            </li>
+
+            <li class="nav-item"><a href="#about" class="nav-link">О нас</a></li>
+            <li class="nav-item"><a href="#gallery" class="nav-link">Галерея</a></li>
+            <li class="nav-item"><button class="btn order-trigger">Связаться с нами</button></li>
         </ul>
 
-        <button class="mobile-menu-btn">☰</button>
-        <div class="mobile-cart" onclick="toggleCart()">
-            <i class="fas fa-shopping-cart"></i>
-            <span class="cart-count-mobile">0</span>
-        </div>
+        <!-- Мобильное меню - вертикальное -->
+        <ul class="mobile-nav">
+            <li><a href="#home" class="mobile-nav-link">Главная</a></li>
+
+            <li class="mobile-menu-item">
+                <a href="#menu" class="mobile-nav-link mobile-dropdown-trigger">Меню</a>
+                <ul class="mobile-dropdown">
+                    <li><a href="#pizza">Пицца</a></li>
+                    <li><a href="#pasta">Паста</a></li>
+                    <li><a href="#salads">Салаты</a></li>
+                    <li><a href="#drinks">Напитки</a></li>
+                    <li><a href="#desserts">Десерты</a></li>
+                </ul>
+            </li>
+
+            <li><a href="#about" class="mobile-nav-link">О нас</a></li>
+            <li><a href="#gallery" class="mobile-nav-link">Галерея</a></li>
+            <li><button class="btn order-trigger mobile-order-btn">Связаться с нами</button></li>
+        </ul>
     </div>
 </nav>
 
-<!-- Мобильное меню -->
-<div class="mobile-menu">
-    <button class="mobile-menu-close">×</button>
-    <ul>
-        <li><a href="#home">Главная</a></li>
-        <li><a href="#menu">Меню</a></li>
-        <li><a href="#about">О нас</a></li>
-        <li><a href="#delivery">Доставка</a></li>
-        <li><button class="nav-contacts-button" onclick="toggleContacts()">Контакты</button></li>
-    </ul>
-</div>
-
-<!-- Корзина -->
-<div class="cart-sidebar" id="cartSidebar">
-    <div class="cart-header">
-        <h3>Ваш заказ</h3>
-        <button class="cart-close" onclick="toggleCart()">×</button>
-    </div>
-    <div class="cart-items" id="cartItems">
-        <div class="cart-empty">
-            <i class="fas fa-shopping-cart"></i>
-            <p>Корзина пуста</p>
-            <a href="#menu" class="btn-empty">Посмотреть меню</a>
-        </div>
-    </div>
-    <div class="cart-footer">
-        <div class="cart-total">
-            <span>Итого:</span>
-            <span id="cartTotalPrice">0 ₽</span>
-        </div>
-        <button class="btn-checkout" onclick="openOrderModal()">Оформить заказ</button>
-    </div>
-</div>
-
-<!-- Шапка с видео -->
-<header id="home">
-    <video class="hero-video" autoplay muted loop>
-        <source src="video.mp4" type="video/mp4">
-        Ваш браузер не поддерживает видео.
+<!-- Header -->
+<header class="header" id="home">
+    <video autoplay muted loop class="header-video">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-slicing-tomatoes-for-a-pizza-40147-large.mp4" type="video/mp4">
     </video>
-    <div class="video-overlay"></div>
-
+    <div class="header-overlay"></div>
     <div class="header-content">
-        <h1>Pizza Roma</h1>
-        <p>Настоящая итальянская пицца в Краснодаре</p>
-        <button class="contact-btn" onclick="openOrderModal()">
-            <i class="fas fa-pizza-slice"></i> Заказать онлайн
-        </button>
+        <h1>Лучшая пицца в городе</h1>
+        <p>Настоящая итальянская пицца с дровяной печи</p>
+        <button class="btn order-trigger">Заказать сейчас</button>
     </div>
 </header>
 
-<!-- Основной контент -->
-<main>
-    <!-- Слайдер популярных пицц -->
-    <section class="container">
-        <h2 class="section-title">Популярные пиццы</h2>
-        <div class="slider">
-            <div class="slider-slides">
-                <div class="slider-slide">
-                    <div class="slide-content">
-                        <img src="pizza1.jpg" alt="Пицца Маргарита">
-                        <div class="slide-text">
-                            <h3>Маргарита</h3>
-                            <p>Томатный соус, моцарелла, базилик</p>
-                            <p class="slide-price">450 ₽</p>
-                            <button class="btn-slide" onclick="addToCart(1)">Добавить в корзину</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="slider-slide">
-                    <div class="slide-content">
-                        <img src="pizza2.jpg" alt="Пицца Пепперони">
-                        <div class="slide-text">
-                            <h3>Пепперони</h3>
-                            <p>Острая колбаса, моцарелла, томатный соус</p>
-                            <p class="slide-price">550 ₽</p>
-                            <button class="btn-slide" onclick="addToCart(2)">Добавить в корзину</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="slider-slide">
-                    <div class="slide-content">
-                        <img src="pizza3.jpg" alt="Пицца 4 сыра">
-                        <div class="slide-text">
-                            <h3>4 сыра</h3>
-                            <p>Моцарелла, пармезан, горгонзола, эмменталь</p>
-                            <p class="slide-price">600 ₽</p>
-                            <button class="btn-slide" onclick="addToCart(3)">Добавить в корзину</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <button class="slider-prev">‹</button>
-            <button class="slider-next">›</button>
-        </div>
-    </section>
-
-    <!-- Каталог пицц -->
-    <section class="container" id="menu">
+<!-- Menu -->
+<section class="section" id="menu">
+    <div class="container">
         <h2 class="section-title">Наше меню</h2>
-        <div class="menu-categories">
-            <button class="category-btn active" data-category="all">Все</button>
-            <button class="category-btn" data-category="classic">Классические</button>
-            <button class="category-btn" data-category="special">Фирменные</button>
-            <button class="category-btn" data-category="spicy">Острые</button>
-            <button class="category-btn" data-category="vegetarian">Вегетарианские</button>
-        </div>
+        <div class="menu-grid" id="menuGrid"></div>
+    </div>
+</section>
 
-        <div class="pizzas-grid" id="pizzasGrid">
-            <!-- Пиццы будут добавляться через JavaScript -->
-        </div>
-    </section>
-
-    <!-- Раздел "О нас" -->
-    <section class="container" id="about">
-        <h2 class="section-title">Наша история</h2>
+<!-- About -->
+<section class="section" id="about">
+    <div class="container">
+        <h2 class="section-title">О нашей пиццерии</h2>
         <div class="about-content">
             <div class="about-text">
-                <p>Pizza Roma была основана в 2010 году итальянским шеф-поваром Марко Риччи, который привез в Краснодар традиционные рецепты своей семьи. Мы готовим пиццу исключительно на дровяной печи по старинной итальянской технологии.</p>
-                <p>Все наши ингредиенты поставляются напрямую из Италии: мука типа "00", томаты Сан-Марцано, сыр моцарелла из молока буйволиц и оливковое масло первого отжима.</p>
-                <p>Наше тесто проходит 48-часовую ферментацию, что делает его невероятно воздушным и вкусным.</p>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <i class="fas fa-pizza-slice"></i>
-                        <span class="stat-number">15 000+</span>
-                        <p>Пицц приготовлено</p>
-                    </div>
-                    <div class="stat-item">
-                        <i class="fas fa-users"></i>
-                        <span class="stat-number">8 000+</span>
-                        <p>Довольных клиентов</p>
-                    </div>
-                    <div class="stat-item">
-                        <i class="fas fa-clock"></i>
-                        <span class="stat-number">30 мин</span>
-                        <p>Среднее время доставки</p>
-                    </div>
-                </div>
+                <p>Мы - семейная пиццерия с более чем 20-летним опытом приготовления настоящей итальянской пиццы.</p>
+                <p>Используем только свежие ингредиенты: настоящий сыр моцарелла, помидоры Сан-Марцано, свежий базилик.</p>
+                <p>Наша печь на дровах разогревается до 400°C, что позволяет приготовить пиццу всего за 90 секунд.</p>
+                <p>Доставляем заказы в течение 30 минут или пицца бесплатно!</p>
             </div>
             <div class="about-image">
-                <img src="about.jpg" alt="Наша пиццерия">
+                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Пицца в печи">
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Доставка -->
-    <section class="container delivery-section" id="delivery">
-        <h2 class="section-title">Доставка и оплата</h2>
-        <div class="delivery-content">
-            <div class="delivery-info">
-                <div class="delivery-item">
-                    <i class="fas fa-shipping-fast"></i>
-                    <div>
-                        <h3>Быстрая доставка</h3>
-                        <p>Доставка в течение 30 минут или пицца бесплатно!</p>
-                    </div>
-                </div>
-                <div class="delivery-item">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <div>
-                        <h3>Зона доставки</h3>
-                        <p>Доставляем по всему Краснодару в пределах КАД</p>
-                    </div>
-                </div>
-                <div class="delivery-item">
-                    <i class="fas fa-money-bill-wave"></i>
-                    <div>
-                        <h3>Удобная оплата</h3>
-                        <p>Наличными, картой или онлайн</p>
-                    </div>
-                </div>
-                <div class="delivery-item">
-                    <i class="fas fa-gift"></i>
-                    <div>
-                        <h3>Бесплатная доставка</h3>
-                        <p>При заказе от 1500 рублей</p>
-                    </div>
-                </div>
-            </div>
-            <div class="delivery-map">
-                <div class="map-placeholder">
-                    <i class="fas fa-map"></i>
-                    <p>Карта зоны доставки</p>
-                    <small>г. Краснодар, в пределах КАД</small>
-                </div>
-            </div>
+<!-- Gallery -->
+<section class="section" id="gallery">
+    <div class="container">
+        <h2 class="section-title">Наша галерея</h2>
+        <div class="slider" id="slider">
+            <div class="slider-track" id="sliderTrack"></div>
+            <button class="slider-nav slider-prev" id="sliderPrev">‹</button>
+            <button class="slider-nav slider-next" id="sliderNext">›</button>
+            <div class="slider-dots" id="sliderDots"></div>
         </div>
-    </section>
-</main>
+    </div>
+</section>
 
-<!-- Форма заказа -->
-<div id="feedbackFormAnchor"></div>
-<div class="modal" id="orderModal">
-    <div class="modal-content order-modal-content">
-        <span class="close-btn" onclick="closeOrderModal()">&times;</span>
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-links">
+            <a href="#home" class="footer-link">Главная</a>
+            <a href="#menu" class="footer-link">Меню</a>
+            <a href="#about" class="footer-link">О нас</a>
+            <a href="#gallery" class="footer-link">Галерея</a>
+        </div>
+        <p>г. Москва, ул. Пиццерийная, д. 15 | Ежедневно с 10:00 до 23:00</p>
+        <p>Телефон: +7 (495) 123-45-67</p>
+        <p class="copyright">© 2023 PizzaMania. Все права защищены.</p>
+    </div>
+</footer>
+
+<!-- Order Modal (Анкета для оформления заказа) -->
+<div id="orderModal" class="modal">
+    <div class="modal-content">
+        <button id="closeOrderModal" class="modal-close">×</button>
         <h2>Оформление заказа</h2>
-        <form id="orderForm" action="https://formcarry.com/s/YOUR_FORM_ID" method="POST" accept-charset="UTF-8">
-            <!-- Formcarry hidden fields -->
-            <input type="hidden" name="_gotcha">
-            <input type="hidden" name="_subject" value="Новый заказ с Pizza Roma">
-            <input type="hidden" name="_format" value="plain">
+        <p class="modal-subtitle">Заполните форму для быстрого оформления заказа</p>
+
+        <form id="orderModalForm" class="order-modal-form">
+            <div class="form-group">
+                <label for="modalName">Ваше имя *</label>
+                <input type="text" id="modalName" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="modalPhone">Телефон *</label>
+                <input type="tel" id="modalPhone" class="form-control" required placeholder="+7 (999) 999-99-99">
+            </div>
+
+            <div class="form-group">
+                <label for="modalEmail">Email</label>
+                <input type="email" id="modalEmail" class="form-control">
+            </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="fullName">Ваше имя *</label>
-                    <input type="text" id="fullName" name="fullName" required>
+                    <label for="modalPizza">Выберите пиццу *</label>
+                    <select id="modalPizza" class="form-control" required>
+                        <option value="">-- Выберите пиццу --</option>
+                        <option value="margarita">Маргарита - 450 ₽</option>
+                        <option value="pepperoni">Пепперони - 550 ₽</option>
+                        <option value="four_cheese">Четыре сыра - 600 ₽</option>
+                        <option value="hawaii">Гавайская - 520 ₽</option>
+                        <option value="meat">Мясная - 650 ₽</option>
+                        <option value="vegetarian">Вегетарианская - 500 ₽</option>
+                    </select>
                 </div>
+
                 <div class="form-group">
-                    <label for="phone">Телефон *</label>
-                    <input type="tel" id="phone" name="phone" required>
+                    <label for="modalSize">Размер пиццы</label>
+                    <select id="modalSize" class="form-control">
+                        <option value="small">Маленькая (25 см)</option>
+                        <option value="medium" selected>Средняя (30 см)</option>
+                        <option value="large">Большая (35 см)</option>
+                        <option value="xlarge">Огромная (40 см)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="modalQuantity">Количество *</label>
+                    <select id="modalQuantity" class="form-control" required>
+                        <option value="1">1 пицца</option>
+                        <option value="2">2 пиццы</option>
+                        <option value="3">3 пиццы</option>
+                        <option value="4">4 пиццы</option>
+                        <option value="5">5 пицц</option>
+                        <option value="6">6 и более (уточняйте по телефону)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="modalDelivery">Способ получения</label>
+                    <select id="modalDelivery" class="form-control">
+                        <option value="delivery" selected>Доставка</option>
+                        <option value="pickup">Самовывоз</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" id="addressField">
+                <label for="modalAddress">Адрес доставки *</label>
+                <textarea id="modalAddress" class="form-control" rows="3" required placeholder="Улица, дом, квартира, подъезд, этаж"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="modalTime">Желаемое время</label>
+                <div class="form-row">
+                    <div class="form-group">
+                        <select id="modalDate" class="form-control">
+                            <option value="today">Сегодня</option>
+                            <option value="tomorrow">Завтра</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select id="modalHour" class="form-control">
+                            <option value="asap">Как можно скорее</option>
+                            <option value="12">12:00</option>
+                            <option value="13">13:00</option>
+                            <option value="14">14:00</option>
+                            <option value="15">15:00</option>
+                            <option value="16">16:00</option>
+                            <option value="17">17:00</option>
+                            <option value="18">18:00</option>
+                            <option value="19">19:00</option>
+                            <option value="20">20:00</option>
+                            <option value="21">21:00</option>
+                            <option value="22">22:00</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="address">Адрес доставки *</label>
-                <input type="text" id="address" name="address" required>
+                <label for="modalComments">Комментарии к заказу</label>
+                <textarea id="modalComments" class="form-control" rows="3" placeholder="Дополнительные пожелания, аллергии, особые указания..."></textarea>
             </div>
 
-            <div class="form-group">
-                <label for="deliveryTime">Время доставки</label>
-                <select id="deliveryTime" name="deliveryTime">
-                    <option value="asap">Как можно скорее</option>
-                    <option value="30">В течение 30 минут</option>
-                    <option value="60">В течение часа</option>
-                    <option value="specific">Указать точное время</option>
-                </select>
-            </div>
-
-            <div class="form-group" id="specificTimeGroup" style="display: none;">
-                <label for="specificTime">Точное время</label>
-                <input type="datetime-local" id="specificTime" name="specificTime">
-            </div>
-
-            <div class="form-group">
-                <label for="paymentMethod">Способ оплаты</label>
-                <select id="paymentMethod" name="paymentMethod">
-                    <option value="cash">Наличными курьеру</option>
-                    <option value="card">Картой курьеру</option>
-                    <option value="online">Онлайн оплата</option>
-                </select>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="modalAgree" required>
+                <label for="modalAgree">Я согласен на обработку персональных данных и с <a href="#" style="color: #dc3545;">условиями доставки</a></label>
             </div>
 
             <div class="order-summary">
-                <h3>Ваш заказ:</h3>
-                <div class="summary-items" id="orderSummary">
-                    <!-- Товары будут добавляться через JS -->
-                </div>
-                <div class="summary-total">
-                    <span>Итого:</span>
-                    <span id="orderTotal">0 ₽</span>
-                </div>
+                <h3>Сумма заказа: <span id="orderTotal">450 ₽</span></h3>
+                <p class="summary-note">*Итоговая сумма может измениться при добавлении дополнительных ингредиентов</p>
             </div>
 
-            <div class="form-group">
-                <label for="notes">Комментарий к заказу</label>
-                <textarea id="notes" name="notes" rows="3" placeholder="Например: не звонить, оставить у двери, позвонить заранее..."></textarea>
-            </div>
+            <div id="orderMessageContainer"></div>
 
-            <div class="checkbox-group">
-                <input type="checkbox" id="privacyPolicy" name="privacyPolicy" required>
-                <label for="privacyPolicy">Я согласен с политикой обработки персональных данных *</label>
-            </div>
-
-            <button type="submit" class="submit-btn" id="submitOrderBtn">
-                <span class="btn-text">Заказать</span>
-                <span class="btn-loader" style="display: none;">
-                    <i class="fas fa-spinner fa-spin"></i> Отправляем...
-                </span>
+            <button type="submit" class="btn" id="modalSubmitBtn" style="width: 100%; padding: 15px; font-size: 1.2rem;">
+                Оформить заказ
             </button>
         </form>
-
-        <div class="message" id="responseMessage"></div>
     </div>
 </div>
-
-<!-- Подвал -->
-<footer>
-    <div class="footer-content">
-        <div class="footer-section">
-            <div class="footer-logo">
-                <i class="fas fa-pizza-slice"></i>
-                Pizza Roma
-            </div>
-            <p>Настоящая итальянская пицца в Краснодаре</p>
-            <div class="social-links">
-                <a href="#"><i class="fab fa-vk"></i></a>
-                <a href="#"><i class="fab fa-telegram"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
-            </div>
-        </div>
-        <div class="footer-section">
-            <h3>Контакты</h3>
-            <p><i class="fas fa-phone"></i> +7 (918) 123-45-67</p>
-            <p><i class="fas fa-envelope"></i> pizza.roma@mail.ru</p>
-            <p><i class="fas fa-map-marker-alt"></i> г. Краснодар, ул. Итальянская, 15</p>
-        </div>
-        <div class="footer-section">
-            <h3>Часы работы</h3>
-            <p>Ежедневно: 10:00-23:00</p>
-            <p>Доставка: 11:00-22:30</p>
-            <p>Без выходных</p>
-        </div>
-    </div>
-    <div class="footer-bottom">
-        <p>Pizza Roma &copy; 2025. Все права защищены.</p>
-    </div>
-</footer>
 
 <script src="script.js"></script>
 </body>
