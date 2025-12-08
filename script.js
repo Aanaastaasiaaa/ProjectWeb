@@ -1,48 +1,45 @@
-// Ожидание загрузки DOM
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM загружен');
 
-    // Данные для меню с ценами
     const menuItems = [
         {
             name: "Маргарита",
-            description: "Томатный соус, моцарелла, свежий базилик",
+            description: "Томатный соус, моцарелла, свежий базилик, томаты",
             price: 450,
-            image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=300&q=80"
+            image: "margarita.webp"
         },
         {
             name: "Пепперони",
             description: "Томатный соус, моцарелла, пепперони",
             price: 550,
-            image: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=300&q=80"
+            image: "peporoni.webp"
         },
         {
             name: "Четыре сыра",
             description: "Моцарелла, горгонзола, пармезан, фета",
             price: 600,
-            image: "https://images.unsplash.com/photo-1559978137-8c560d91e9e1?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=300&q=80"
+            image: "4cheese.jfif"
         },
         {
             name: "Гавайская",
             description: "Томатный соус, моцарелла, ветчина, ананас",
             price: 520,
-            image: "https://images.unsplash.com/photo-1595703013566-db085ae93c04?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=300&q=80"
+            image: "gavai.jpg"
         },
         {
             name: "Мясная",
             description: "Томатный соус, моцарелла, ветчина, бекон, пепперони, говядина",
             price: 650,
-            image: "https://images.unsplash.com/photo-1552539618-7eec9f4e1556?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=300&q=80"
+            image: "m.webp"
         },
         {
             name: "Вегетарианская",
             description: "Томатный соус, моцарелла, перец, грибы, лук, оливки",
             price: 500,
-            image: "https://images.unsplash.com/photo-1593246049226-ded77bf90326?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=300&q=80"
+            image: "v.jpeg"
         }
     ];
 
-    // Данные для слайдера
     const slides = [
         {
             image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=500&q=80",
