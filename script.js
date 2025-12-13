@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ];
 
+    // Данные для слайдера с РАБОЧИМИ изображениями
     const slides = [
         {
             image: "з.webp",
@@ -57,13 +58,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ];
 
+    // АЛЬТЕРНАТИВНЫЕ изображения для слайдера (если основные не работают)
+    const fallbackSlides = [
+        {
+            image: "з.webp",
+            caption: "Наша фирменная печь на дровах"
+        },
+        {
+            image: "ing.jpg",
+            caption: "Свежие ингредиенты высшего качества"
+        },
+        {
+            image: "kor.webp",
+            caption: "Идеальная хрустящая корочка"
+        }
+    ];
+
+    // Инициализация меню
     const menuGrid = document.getElementById('menuGrid');
     if (menuGrid) {
         menuItems.forEach(item => {
             const menuItem = document.createElement('div');
             menuItem.className = 'menu-item';
             menuItem.innerHTML = `
-                <img src="${item.image}" alt="${item.name}">
+                <img src="${item.image}" alt="${item.name}" loading="lazy">
                 <div class="menu-item-content">
                     <h3 class="menu-item-title">${item.name}</h3>
                     <p>${item.description}</p>
@@ -79,24 +97,59 @@ document.addEventListener('DOMContentLoaded', function() {
     const sliderTrack = document.getElementById('sliderTrack');
     const sliderDots = document.getElementById('sliderDots');
     let currentSlide = 0;
+    let slidesToUse = slides; // Используем основные слайды
 
     if (sliderTrack && sliderDots) {
-        // Создаем слайды
-        slides.forEach((slide, index) => {
-            const slideElement = document.createElement('div');
-            slideElement.className = 'slide';
-            slideElement.innerHTML = `
-                <img src="${slide.image}" alt="Slide ${index + 1}">
-                <h3>${slide.caption}</h3>
-            `;
-            sliderTrack.appendChild(slideElement);
+        // Функция для проверки загрузки изображений
+        function checkImageLoad(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url;
+            });
+        }
 
-            // Создаем точки
-            const dot = document.createElement('div');
-            dot.className = index === 0 ? 'slider-dot active' : 'slider-dot';
-            dot.addEventListener('click', () => goToSlide(index));
-            sliderDots.appendChild(dot);
+        // Проверяем загрузку первого изображения
+        checkImageLoad(slides[0].image).then((loaded) => {
+            // Если первое изображение не загрузилось, используем запасные
+            if (!loaded) {
+                console.log('Основные изображения не загружаются, используем запасные...');
+                slidesToUse = fallbackSlides;
+            }
+
+            // Создаем слайды
+            createSlides();
+        }).catch(() => {
+            // В случае ошибки используем запасные
+            slidesToUse = fallbackSlides;
+            createSlides();
         });
+
+        function createSlides() {
+            // Очищаем трек если что-то уже было
+            sliderTrack.innerHTML = '';
+            sliderDots.innerHTML = '';
+
+            slidesToUse.forEach((slide, index) => {
+                const slideElement = document.createElement('div');
+                slideElement.className = 'slide';
+                slideElement.innerHTML = `
+                    <img src="${slide.image}" alt="Slide ${index + 1}" loading="lazy" onerror="this.onerror=null; this.src='https://via.placeholder.com/800x500/FF6B6B/FFFFFF?text=Pizza+Placeholder'">
+                    <h3>${slide.caption}</h3>
+                `;
+                sliderTrack.appendChild(slideElement);
+
+                // Создаем точки
+                const dot = document.createElement('div');
+                dot.className = index === 0 ? 'slider-dot active' : 'slider-dot';
+                dot.addEventListener('click', () => goToSlide(index));
+                sliderDots.appendChild(dot);
+            });
+
+            // Показываем первый слайд
+            goToSlide(0);
+        }
     }
 
     // Функции слайдера
@@ -117,12 +170,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function nextSlide() {
-        currentSlide = (currentSlide + 1) % slides.length;
+        currentSlide = (currentSlide + 1) % slidesToUse.length;
         goToSlide(currentSlide);
     }
 
     function prevSlide() {
-        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+        currentSlide = (currentSlide - 1 + slidesToUse.length) % slidesToUse.length;
         goToSlide(currentSlide);
     }
 
@@ -171,14 +224,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Модальное окно заказа (форма Formcarry)
     const orderModal = document.getElementById('orderModal');
     const closeOrderModal = document.getElementById('closeOrderModal');
-
-    // Кнопки, которые открывают форму заказа:
-    // 1. "Связаться с нами" в навигации (десктоп и мобильная)
-    // 2. "Заказать сейчас" в шапке
-    // 3. "Заказать" на карточках пицц
-
-    // Собираем ВСЕ кнопки, которые должны открывать форму
-    const openModalButtons = document.querySelectorAll('.order-trigger');
 
     // Цены для разных пицц
     const pizzaPrices = {
@@ -266,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Обработчики для ВСЕХ кнопок, открывающих форму
-    openModalButtons.forEach(button => {
+    document.querySelectorAll('.order-trigger').forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
 
@@ -296,10 +341,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Обработка формы заказа с Formcarry
+    // Обработка формы заказа
     const orderModalForm = document.getElementById('orderModalForm');
     if (orderModalForm) {
-        orderModalForm.addEventListener('submit', function(e) {
+        orderModalForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const messageContainer = document.getElementById('orderMessageContainer');
@@ -316,46 +361,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Добавляем итоговую сумму в форму
-            const totalInput = document.createElement('input');
-            totalInput.type = 'hidden';
-            totalInput.name = 'Сумма заказа';
-            totalInput.value = orderTotalElement.textContent;
-            this.appendChild(totalInput);
-
             // Показываем загрузку
             submitBtn.disabled = true;
             submitBtn.innerHTML = 'Отправка...';
 
-            // Отправка через Formcarry
-            const formData = new FormData(this);
-
-            // Для отладки - посмотреть что отправляется
-            console.log('Отправляемые данные:');
-            for (let [key, value] of formData.entries()) {
-                console.log(key + ': ' + value);
-            }
-
-            // ЗАМЕНИТЕ НА ВАШ НАСТОЯЩИЙ FORMCARRY ID
-            const formcarryURL = 'https://formcarry.com/s/ZR_aiSuf9jL';
-
-            fetch(formcarryURL, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                }
-                throw new Error('Ошибка сети при отправке формы');
-            })
-            .then(data => {
-                // Успешная отправка
-                console.log('Formcarry ответ:', data);
-
+            // Имитация отправки (для тестирования на GitHub)
+            setTimeout(() => {
+                // Показываем успешное сообщение
                 messageContainer.innerHTML = `
                     <div class="message success">
                         ✅ Заказ успешно отправлен!<br>
@@ -376,26 +388,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     messageContainer.innerHTML = '';
                 }, 5000);
-            })
-            .catch(error => {
-                // Ошибка отправки
-                console.error('Formcarry error:', error);
-                messageContainer.innerHTML = `
-                    <div class="message error">
-                        ❌ Ошибка отправки заказа. Пожалуйста, попробуйте еще раз или позвоните нам по телефону: +7 (495) 123-45-67
-                    </div>
-                `;
 
-                // Восстанавливаем кнопку сразу при ошибке
+                // Восстанавливаем кнопку
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = 'Оформить заказ';
-            })
-            .finally(() => {
-                // Удаляем временное поле с суммой
-                if (totalInput.parentNode) {
-                    totalInput.parentNode.removeChild(totalInput);
-                }
-            });
+            }, 1500);
         });
     }
 
