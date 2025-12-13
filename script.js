@@ -1,10 +1,12 @@
+// Ожидание загрузки DOM
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM загружен');
 
+    // Данные для меню с ценами
     const menuItems = [
         {
             name: "Маргарита",
-            description: "Томатный соус, моцарелла, свежий базилик, томаты",
+            description: "Томатный соус, моцарелла, свежий базилик",
             price: 450,
             image: "margarita.webp"
         },
@@ -42,20 +44,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const slides = [
         {
-            image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=500&q=80",
+            image: "з.webp",
             caption: "Наша фирменная печь на дровах"
         },
         {
-            image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=500&q=80",
+            image: "ing.jpg",
             caption: "Свежие ингредиенты высшего качества"
         },
         {
-            image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=500&q=80",
+            image: "kor.webp",
             caption: "Идеальная хрустящая корочка"
         }
     ];
 
-    // Инициализация меню
     const menuGrid = document.getElementById('menuGrid');
     if (menuGrid) {
         menuItems.forEach(item => {
@@ -78,7 +79,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const sliderTrack = document.getElementById('sliderTrack');
     const sliderDots = document.getElementById('sliderDots');
     let currentSlide = 0;
-    let slideInterval;
 
     if (sliderTrack && sliderDots) {
         // Создаем слайды
@@ -97,9 +97,6 @@ document.addEventListener('DOMContentLoaded', function() {
             dot.addEventListener('click', () => goToSlide(index));
             sliderDots.appendChild(dot);
         });
-
-        // Запускаем автоматическое переключение
-        slideInterval = setInterval(nextSlide, 4000);
     }
 
     // Функции слайдера
@@ -134,19 +131,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const sliderNext = document.getElementById('sliderNext');
 
     if (sliderPrev) {
-        sliderPrev.addEventListener('click', () => {
-            prevSlide();
-            clearInterval(slideInterval);
-            slideInterval = setInterval(nextSlide, 4000);
-        });
+        sliderPrev.addEventListener('click', prevSlide);
     }
 
     if (sliderNext) {
-        sliderNext.addEventListener('click', () => {
-            nextSlide();
-            clearInterval(slideInterval);
-            slideInterval = setInterval(nextSlide, 4000);
-        });
+        sliderNext.addEventListener('click', nextSlide);
     }
 
     // Раскрытие/скрытие выпадающего меню в мобильной версии
@@ -179,32 +168,87 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Модальное окно заказа
+    // Модальное окно заказа (форма Formcarry)
     const orderModal = document.getElementById('orderModal');
     const closeOrderModal = document.getElementById('closeOrderModal');
-    const orderTriggers = document.querySelectorAll('.order-trigger');
+
+    // Кнопки, которые открывают форму заказа:
+    // 1. "Связаться с нами" в навигации (десктоп и мобильная)
+    // 2. "Заказать сейчас" в шапке
+    // 3. "Заказать" на карточках пицц
+
+    // Собираем ВСЕ кнопки, которые должны открывать форму
+    const openModalButtons = document.querySelectorAll('.order-trigger');
+
+    // Цены для разных пицц
+    const pizzaPrices = {
+        'Маргарита': 450,
+        'Пепперони': 550,
+        'Четыре сыра': 600,
+        'Гавайская': 520,
+        'Мясная': 650,
+        'Вегетарианская': 500
+    };
+
+    // Элементы формы
     const modalPizzaSelect = document.getElementById('modalPizza');
     const modalQuantitySelect = document.getElementById('modalQuantity');
     const orderTotalElement = document.getElementById('orderTotal');
     const addressField = document.getElementById('addressField');
     const modalDeliverySelect = document.getElementById('modalDelivery');
 
-    // Цены для разных пицц
-    const pizzaPrices = {
-        'margarita': 450,
-        'pepperoni': 550,
-        'four_cheese': 600,
-        'hawaii': 520,
-        'meat': 650,
-        'vegetarian': 500
-    };
+    // Функция для открытия модального окна
+    function openOrderModal(pizzaName = '') {
+        if (orderModal) {
+            // Сброс формы
+            document.getElementById('orderModalForm').reset();
+            document.getElementById('orderMessageContainer').innerHTML = '';
+
+            // Если передано название пиццы (при клике на "Заказать" в карточке)
+            if (pizzaName) {
+                // Находим соответствующий option
+                for (let option of modalPizzaSelect.options) {
+                    if (option.text.includes(pizzaName) || option.value === pizzaName) {
+                        modalPizzaSelect.value = option.value;
+                        break;
+                    }
+                }
+            }
+
+            // Показываем модальное окно
+            orderModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+
+            // Пересчитываем сумму
+            calculateOrderTotal();
+
+            // Управление полем адреса
+            updateAddressField();
+        }
+    }
 
     // Расчет суммы заказа
     function calculateOrderTotal() {
-        const pizzaPrice = pizzaPrices[modalPizzaSelect.value] || 450;
-        const quantity = parseInt(modalQuantitySelect.value) || 1;
+        const selectedOption = modalPizzaSelect.options[modalPizzaSelect.selectedIndex];
+        const pizzaName = selectedOption ? selectedOption.value : '';
+        const pizzaPrice = pizzaPrices[pizzaName] || 450;
+        const quantityValue = modalQuantitySelect.value;
+        const quantity = parseInt(quantityValue) || 1;
         const total = pizzaPrice * quantity;
         orderTotalElement.textContent = total + ' ₽';
+    }
+
+    // Обновление поля адреса
+    function updateAddressField() {
+        if (modalDeliverySelect.value === 'Самовывоз') {
+            addressField.style.display = 'none';
+            document.getElementById('modalAddress').required = false;
+            document.getElementById('modalAddress').value = 'Самовывоз: г. Москва, ул. Пиццерийная, д. 15';
+        } else {
+            addressField.style.display = 'block';
+            document.getElementById('modalAddress').required = true;
+            document.getElementById('modalAddress').value = '';
+        }
     }
 
     // Обновление суммы при изменении выбора
@@ -218,62 +262,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Управление полем адреса в зависимости от способа получения
     if (modalDeliverySelect) {
-        modalDeliverySelect.addEventListener('change', function() {
-            const addressInput = document.getElementById('modalAddress');
-            if (this.value === 'pickup') {
-                addressField.style.display = 'none';
-                addressInput.required = false;
-                addressInput.value = 'Самовывоз: г. Москва, ул. Пиццерийная, д. 15';
-            } else {
-                addressField.style.display = 'block';
-                addressInput.required = true;
-                addressInput.value = '';
-            }
-        });
+        modalDeliverySelect.addEventListener('change', updateAddressField);
     }
 
-    // Открытие модального окна заказа
-    orderTriggers.forEach(button => {
+    // Обработчики для ВСЕХ кнопок, открывающих форму
+    openModalButtons.forEach(button => {
         button.addEventListener('click', (e) => {
-            // Если у кнопки есть данные о пицце (из карточки меню)
+            e.preventDefault();
+
+            // Получаем данные о пицце, если кнопка на карточке
             const pizzaName = e.target.getAttribute('data-pizza');
-            const pizzaPrice = e.target.getAttribute('data-price');
 
-            if (orderModal) {
-                // Сброс формы
-                document.getElementById('orderModalForm').reset();
-                document.getElementById('orderMessageContainer').innerHTML = '';
-
-                // Если пицца выбрана из меню
-                if (pizzaName) {
-                    // Находим соответствующий option
-                    for (let option of modalPizzaSelect.options) {
-                        if (option.text.includes(pizzaName)) {
-                            modalPizzaSelect.value = option.value;
-                            break;
-                        }
-                    }
-                }
-
-                // Показываем модальное окно
-                orderModal.style.display = 'flex';
-                document.body.style.overflow = 'hidden'; // Блокируем скролл
-
-                // Пересчитываем сумму
-                calculateOrderTotal();
-
-                // Управление полем адреса
-                const deliverySelect = document.getElementById('modalDelivery');
-                if (deliverySelect.value === 'pickup') {
-                    addressField.style.display = 'none';
-                    document.getElementById('modalAddress').required = false;
-                    document.getElementById('modalAddress').value = 'Самовывоз: г. Москва, ул. Пиццерийная, д. 15';
-                } else {
-                    addressField.style.display = 'block';
-                    document.getElementById('modalAddress').required = true;
-                    document.getElementById('modalAddress').value = '';
-                }
-            }
+            // Открываем модальное окно
+            openOrderModal(pizzaName);
         });
     });
 
@@ -282,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
         closeOrderModal.addEventListener('click', () => {
             if (orderModal) {
                 orderModal.style.display = 'none';
-                document.body.style.overflow = ''; // Разблокируем скролл
+                document.body.style.overflow = '';
             }
         });
     }
@@ -291,11 +292,11 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('click', (event) => {
         if (event.target === orderModal) {
             orderModal.style.display = 'none';
-            document.body.style.overflow = ''; // Разблокируем скролл
+            document.body.style.overflow = '';
         }
     });
 
-    // Обработка формы заказа
+    // Обработка формы заказа с Formcarry
     const orderModalForm = document.getElementById('orderModalForm');
     if (orderModalForm) {
         orderModalForm.addEventListener('submit', function(e) {
@@ -315,43 +316,54 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Собираем данные заказа
-            const orderData = {
-                name: document.getElementById('modalName').value,
-                phone: document.getElementById('modalPhone').value,
-                email: document.getElementById('modalEmail').value,
-                pizza: document.getElementById('modalPizza').value,
-                size: document.getElementById('modalSize').value,
-                quantity: document.getElementById('modalQuantity').value,
-                delivery: document.getElementById('modalDelivery').value,
-                address: document.getElementById('modalAddress').value,
-                date: document.getElementById('modalDate').value,
-                time: document.getElementById('modalHour').value,
-                comments: document.getElementById('modalComments').value,
-                total: orderTotalElement.textContent
-            };
-
-            console.log('Данные заказа:', orderData);
+            // Добавляем итоговую сумму в форму
+            const totalInput = document.createElement('input');
+            totalInput.type = 'hidden';
+            totalInput.name = 'Сумма заказа';
+            totalInput.value = orderTotalElement.textContent;
+            this.appendChild(totalInput);
 
             // Показываем загрузку
             submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Оформление заказа...';
+            submitBtn.innerHTML = 'Отправка...';
 
-            // Имитируем отправку на сервер
-            setTimeout(() => {
-                // Показываем успешное сообщение
+            // Отправка через Formcarry
+            const formData = new FormData(this);
+
+            // Для отладки - посмотреть что отправляется
+            console.log('Отправляемые данные:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key + ': ' + value);
+            }
+
+            // ЗАМЕНИТЕ НА ВАШ НАСТОЯЩИЙ FORMCARRY ID
+            const formcarryURL = 'https://formcarry.com/s/ZR_aiSuf9jL';
+
+            fetch(formcarryURL, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Ошибка сети при отправке формы');
+            })
+            .then(data => {
+                // Успешная отправка
+                console.log('Formcarry ответ:', data);
+
                 messageContainer.innerHTML = `
                     <div class="message success">
-                        ✅ Заказ успешно оформлен!<br>
+                        ✅ Заказ успешно отправлен!<br>
                         <strong>Номер заказа: #${Math.floor(1000 + Math.random() * 9000)}</strong><br>
                         Ожидайте звонка от нашего оператора в течение 5 минут.<br>
-                        Итоговая сумма: ${orderData.total}
+                        Итоговая сумма: ${orderTotalElement.textContent}
                     </div>
                 `;
-
-                // Восстанавливаем кнопку
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Оформить заказ';
 
                 // Очищаем форму
                 orderModalForm.reset();
@@ -360,11 +372,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => {
                     if (orderModal) {
                         orderModal.style.display = 'none';
-                        document.body.style.overflow = ''; // Разблокируем скролл
+                        document.body.style.overflow = '';
                     }
                     messageContainer.innerHTML = '';
                 }, 5000);
-            }, 2000);
+            })
+            .catch(error => {
+                // Ошибка отправки
+                console.error('Formcarry error:', error);
+                messageContainer.innerHTML = `
+                    <div class="message error">
+                        ❌ Ошибка отправки заказа. Пожалуйста, попробуйте еще раз или позвоните нам по телефону: +7 (495) 123-45-67
+                    </div>
+                `;
+
+                // Восстанавливаем кнопку сразу при ошибке
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Оформить заказ';
+            })
+            .finally(() => {
+                // Удаляем временное поле с суммой
+                if (totalInput.parentNode) {
+                    totalInput.parentNode.removeChild(totalInput);
+                }
+            });
         });
     }
 
