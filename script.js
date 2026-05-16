@@ -1,4 +1,3 @@
-// ========== ОЖИДАНИЕ ЗАГРУЗКИ DOM ==========
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM загружен');
 
@@ -6,93 +5,76 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentPizzaPrice = 450;
     const API_URL = '/api.php';
 
-    // ========== ЗАГРУЗКА ПИЦЦ ИЗ БД ==========
-    async function loadPizzasFromDB() {
-        try {
-            const response = await fetch(API_URL + '/pizzas');
-            const pizzas = await response.json();
-            
-            const menuGrid = document.getElementById('menuGrid');
-            const pizzaSelect = document.getElementById('modalPizza');
-            if (!menuGrid) return;
-            
-            menuGrid.innerHTML = '';
-            if (pizzaSelect) pizzaSelect.innerHTML = '<option value="">-- Выберите пиццу --</option>';
-            
-            pizzas.forEach(pizza => {
-                // Добавляем карточку в меню
-                const menuItem = document.createElement('div');
-                menuItem.className = 'menu-item';
-                menuItem.innerHTML = `
-                    <img src="images/${pizza.image}" alt="${escapeHtml(pizza.name)}">
-                    <div class="menu-item-content">
-                        <h3 class="menu-item-title">${escapeHtml(pizza.name)}</h3>
-                        <p>${escapeHtml(pizza.description)}</p>
-                        <div class="menu-item-price">${pizza.price} ₽</div>
-                        <button class="btn order-trigger" data-pizza="${escapeHtml(pizza.name)}" data-price="${pizza.price}">Заказать</button>
-                    </div>
-                `;
-                menuGrid.appendChild(menuItem);
-                
-                // Добавляем в выпадающий список формы
-                if (pizzaSelect) {
-                    const option = document.createElement('option');
-                    option.value = pizza.name;
-                    option.textContent = `${pizza.name} - ${pizza.price} ₽`;
-                    pizzaSelect.appendChild(option);
-                }
-            });
-            
-            // Переназначаем обработчики на кнопки "Заказать"
-            document.querySelectorAll('.order-trigger').forEach(btn => {
-                btn.removeEventListener('click', orderButtonHandler);
-                btn.addEventListener('click', orderButtonHandler);
-            });
-        } catch (error) {
-            console.error('Ошибка загрузки пицц:', error);
-            // Если API не работает, используем статичные данные
-            loadStaticPizzas();
-        }
-    }
-
-    // Фолбек: если API не работает, грузим пиццы из статики
-    function loadStaticPizzas() {
-        const staticPizzas = [
+    // ========== ДАННЫЕ МЕНЮ (ПОЛНЫЙ КАТАЛОГ) ==========
+    const menuData = {
+        pizza: [
             { name: "Маргарита", description: "Томатный соус, моцарелла, свежий базилик", price: 450, image: "margarita.webp" },
             { name: "Пепперони", description: "Томатный соус, моцарелла, пепперони", price: 550, image: "peporoni.webp" },
             { name: "Четыре сыра", description: "Моцарелла, горгонзола, пармезан, фета", price: 600, image: "4cheese.jfif" },
             { name: "Гавайская", description: "Томатный соус, моцарелла, ветчина, ананас", price: 520, image: "gavai.jpg" },
             { name: "Мясная", description: "Ветчина, бекон, пепперони, говядина", price: 650, image: "m.webp" },
             { name: "Вегетарианская", description: "Перец, грибы, лук, оливки", price: 500, image: "v.jpeg" }
-        ];
-        
-        const menuGrid = document.getElementById('menuGrid');
-        const pizzaSelect = document.getElementById('modalPizza');
-        if (menuGrid) menuGrid.innerHTML = '';
-        if (pizzaSelect) pizzaSelect.innerHTML = '<option value="">-- Выберите пиццу --</option>';
-        
-        staticPizzas.forEach(pizza => {
-            if (menuGrid) {
-                const menuItem = document.createElement('div');
-                menuItem.className = 'menu-item';
-                menuItem.innerHTML = `
-                    <img src="images/${pizza.image}" alt="${pizza.name}">
-                    <div class="menu-item-content">
-                        <h3 class="menu-item-title">${pizza.name}</h3>
-                        <p>${pizza.description}</p>
-                        <div class="menu-item-price">${pizza.price} ₽</div>
-                        <button class="btn order-trigger" data-pizza="${pizza.name}" data-price="${pizza.price}">Заказать</button>
-                    </div>
-                `;
-                menuGrid.appendChild(menuItem);
-            }
-            if (pizzaSelect) {
-                const option = document.createElement('option');
-                option.value = pizza.name;
-                option.textContent = `${pizza.name} - ${pizza.price} ₽`;
-                pizzaSelect.appendChild(option);
-            }
+        ],
+        pasta: [
+            { name: "Карбонара", description: "Спагетти, бекон, яйцо, пармезан, сливочный соус", price: 420, image: "carbonara.jpg" },
+            { name: "Болоньезе", description: "Спагетти, мясной соус из говядины, пармезан", price: 450, image: "bolognese.jpg" },
+            { name: "Альфредо", description: "Феттуччини, курица, грибы, сливочный соус", price: 480, image: "alfredo.jpg" }
+        ],
+        salads: [
+            { name: "Цезарь с курицей", description: "Курица, пармезан, сухарики, соус Цезарь", price: 350, image: "caesar.jpg" },
+            { name: "Греческий", description: "Овощи, фета, оливки, оливковое масло", price: 320, image: "greek.jpg" }
+        ],
+        drinks: [
+            { name: "Coca-Cola", description: "0.5 л", price: 120, image: "coca.jpg" },
+            { name: "Лимонад", description: "Домашний, 0.5 л", price: 150, image: "lemonade.jpg" }
+        ],
+        desserts: [
+            { name: "Тирамису", description: "Классический итальянский десерт", price: 280, image: "tiramisu.jpg" },
+            { name: "Чизкейк", description: "Нежный сливочный чизкейк", price: 250, image: "cheesecake.jpg" }
+        ]
+    };
+
+    // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
         });
+    }
+
+    // ========== ЗАГРУЗКА МЕНЮ ПО КАТЕГОРИЯМ ==========
+    function loadCategory(category, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        const items = menuData[category];
+        if (!items) return;
+        
+        items.forEach(item => {
+            const menuItem = document.createElement('div');
+            menuItem.className = 'menu-item';
+            menuItem.innerHTML = `
+                <img src="images/${item.image}" alt="${item.name}" onerror="this.src='images/placeholder.jpg'">
+                <div class="menu-item-content">
+                    <h3 class="menu-item-title">${escapeHtml(item.name)}</h3>
+                    <p>${escapeHtml(item.description)}</p>
+                    <div class="menu-item-price">${item.price} ₽</div>
+                    <button class="btn order-trigger" data-pizza="${escapeHtml(item.name)}" data-price="${item.price}">Заказать</button>
+                </div>
+            `;
+            container.appendChild(menuItem);
+        });
+    }
+
+    function loadAllCategories() {
+        loadCategory('pizza', 'pizza-grid');
+        loadCategory('pasta', 'pasta-grid');
+        loadCategory('salads', 'salads-grid');
+        loadCategory('drinks', 'drinks-grid');
+        loadCategory('desserts', 'desserts-grid');
         
         document.querySelectorAll('.order-trigger').forEach(btn => {
             btn.removeEventListener('click', orderButtonHandler);
@@ -107,20 +89,9 @@ document.addEventListener('DOMContentLoaded', function() {
         openOrderModal(pizzaName, pizzaPrice);
     }
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
     // ========== МОДАЛЬНОЕ ОКНО ЗАКАЗА ==========
     function openOrderModal(pizzaName = '', pizzaPrice = null) {
         if (pizzaPrice) currentPizzaPrice = pizzaPrice;
-        
         const modal = document.getElementById('orderModal');
         const pizzaSelect = document.getElementById('modalPizza');
         
@@ -132,9 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
-        
         updateOrderTotal();
-        
         if (modal) {
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
@@ -150,12 +119,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (totalSpan) totalSpan.textContent = total + ' ₽';
     }
 
-    // Показ адреса в зависимости от способа получения
     function updateAddressField() {
         const deliverySelect = document.getElementById('modalDelivery');
         const addressField = document.getElementById('addressField');
         const addressInput = document.getElementById('modalAddress');
-        
         if (deliverySelect && deliverySelect.value === 'Самовывоз') {
             if (addressField) addressField.style.display = 'none';
             if (addressInput) {
@@ -202,13 +169,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (msgContainer) {
                 msgContainer.innerHTML = '<div class="message success">✅ Заказ успешно оформлен!</div>';
             }
-            
             if (result.login && result.password) {
                 showCredentials(result.login, result.password);
             }
-            
             document.getElementById('orderModalForm')?.reset();
-            
             setTimeout(() => {
                 const modal = document.getElementById('orderModal');
                 if (modal) modal.style.display = 'none';
@@ -287,22 +251,80 @@ document.addEventListener('DOMContentLoaded', function() {
             logoutBtn.href = '#';
             logoutBtn.className = 'btn login-btn';
             logoutBtn.textContent = 'Выйти';
-            logoutBtn.style.background = '#ffd700';
-            logoutBtn.style.color = '#333';
-            logoutBtn.style.marginLeft = '15px';
             logoutBtn.onclick = (e) => {
                 e.preventDefault();
                 window.location.href = '?logout=1';
             };
             navContainer.appendChild(logoutBtn);
-            
-            // Скрываем кнопку "Войти", если есть
-            const loginBtn = document.getElementById('loginNavBtn');
-            if (loginBtn) loginBtn.style.display = 'none';
+            const loginNavBtn = document.getElementById('loginNavBtn');
+            if (loginNavBtn) loginNavBtn.style.display = 'none';
         }
     }
 
-    // ========== СЛАЙДЕР (остаётся твой) ==========
+    // ========== НАВИГАЦИЯ ПО КАТЕГОРИЯМ ==========
+    function setupCategoryButtons() {
+        const buttons = document.querySelectorAll('.category-btn');
+        const categories = ['pizza', 'pasta', 'salads', 'drinks', 'desserts'];
+        
+        buttons.forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const targetId = categories[index] + '-section';
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    }
+
+    function setupDropdownLinks() {
+        const dropdownLinks = document.querySelectorAll('.dropdown-menu a, .mobile-dropdown a');
+        dropdownLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href');
+                if (targetId && targetId !== '#') {
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            });
+        });
+    }
+
+    function setupScrollSpy() {
+        const sections = ['pizza-section', 'pasta-section', 'salads-section', 'drinks-section', 'desserts-section'];
+        const buttons = document.querySelectorAll('.category-btn');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            const scrollPosition = window.scrollY + 150;
+            for (const section of sections) {
+                const element = document.getElementById(section);
+                if (element) {
+                    const offsetTop = element.offsetTop;
+                    const offsetBottom = offsetTop + element.offsetHeight;
+                    if (scrollPosition >= offsetTop && scrollPosition < offsetBottom) {
+                        current = section.replace('-section', '');
+                        break;
+                    }
+                }
+            }
+            buttons.forEach((btn, index) => {
+                const category = btn.getAttribute('data-category');
+                if (category === current) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        });
+    }
+
+    // ========== СЛАЙДЕР ==========
     const slides = [
         { image: "images/з.webp", caption: "Наша фирменная печь на дровах" },
         { image: "images/ing.jpg", caption: "Свежие ингредиенты высшего качества" },
@@ -317,12 +339,8 @@ document.addEventListener('DOMContentLoaded', function() {
         slides.forEach((slide, index) => {
             const slideElement = document.createElement('div');
             slideElement.className = 'slide';
-            slideElement.innerHTML = `
-                <img src="${slide.image}" alt="Slide ${index + 1}">
-                <h3>${slide.caption}</h3>
-            `;
+            slideElement.innerHTML = `<img src="${slide.image}" alt="Slide ${index + 1}"><h3>${slide.caption}</h3>`;
             sliderTrack.appendChild(slideElement);
-            
             const dot = document.createElement('div');
             dot.className = index === 0 ? 'slider-dot active' : 'slider-dot';
             dot.addEventListener('click', () => goToSlide(index));
@@ -337,25 +355,22 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        function nextSlide() {
-            currentSlide = (currentSlide + 1) % slides.length;
-            goToSlide(currentSlide);
-        }
-        
-        function prevSlide() {
+        document.getElementById('sliderPrev')?.addEventListener('click', () => {
             currentSlide = (currentSlide - 1 + slides.length) % slides.length;
             goToSlide(currentSlide);
-        }
-        
-        document.getElementById('sliderPrev')?.addEventListener('click', prevSlide);
-        document.getElementById('sliderNext')?.addEventListener('click', nextSlide);
+        });
+        document.getElementById('sliderNext')?.addEventListener('click', () => {
+            currentSlide = (currentSlide + 1) % slides.length;
+            goToSlide(currentSlide);
+        });
         goToSlide(0);
     }
 
-    // ========== НАЗНАЧЕНИЕ ВСЕХ ОБРАБОТЧИКОВ ==========
-    
-    // Загружаем пиццы
-    loadPizzasFromDB();
+    // ========== ИНИЦИАЛИЗАЦИЯ ==========
+    loadAllCategories();
+    setupCategoryButtons();
+    setupDropdownLinks();
+    setupScrollSpy();
     
     // Форма заказа
     const orderForm = document.getElementById('orderModalForm');
@@ -368,128 +383,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Закрытие модалки заказа
-    const closeOrderModal = document.getElementById('closeOrderModal');
-    if (closeOrderModal) {
-        closeOrderModal.addEventListener('click', () => {
-            document.getElementById('orderModal').style.display = 'none';
-            document.body.style.overflow = '';
-        });
-    }
+    document.getElementById('closeOrderModal')?.addEventListener('click', () => {
+        document.getElementById('orderModal').style.display = 'none';
+        document.body.style.overflow = '';
+    });
     
-    // Способ получения (адрес)
-    const deliverySelect = document.getElementById('modalDelivery');
-    if (deliverySelect) {
-        deliverySelect.addEventListener('change', updateAddressField);
-        updateAddressField();
-    }
-    
-    // Обновление суммы при изменении количества
-    const quantitySelect = document.getElementById('modalQuantity');
-    if (quantitySelect) {
-        quantitySelect.addEventListener('change', updateOrderTotal);
-    }
+    // Способ получения
+    document.getElementById('modalDelivery')?.addEventListener('change', updateAddressField);
+    updateAddressField();
+    document.getElementById('modalQuantity')?.addEventListener('change', updateOrderTotal);
     
     // Авторизация
-    const authForm = document.getElementById('authForm');
-    if (authForm) {
-        authForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const login = document.getElementById('authLogin').value;
-            const password = document.getElementById('authPassword').value;
-            await loginUser(login, password);
-        });
-    }
+    document.getElementById('authForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const login = document.getElementById('authLogin').value;
+        const password = document.getElementById('authPassword').value;
+        await loginUser(login, password);
+    });
     
-    // Кнопка входа в меню
+    // Кнопка входа
     const authModal = document.getElementById('authModal');
-    const closeAuthModal = document.getElementById('closeAuthModal');
-    
     const loginNavBtn = document.createElement('a');
     loginNavBtn.id = 'loginNavBtn';
     loginNavBtn.href = '#';
     loginNavBtn.className = 'btn login-btn';
     loginNavBtn.textContent = 'Войти';
-    loginNavBtn.style.marginLeft = '15px';
-    loginNavBtn.onclick = (e) => {
-        e.preventDefault();
-        if (authModal) authModal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    };
-    
-    const desktopMenu = document.querySelector('.desktop-menu');
-    if (desktopMenu) {
-        desktopMenu.appendChild(loginNavBtn);
-    }
-    
-    if (closeAuthModal) {
-        closeAuthModal.addEventListener('click', () => {
-            if (authModal) authModal.style.display = 'none';
-            document.body.style.overflow = '';
-        });
-    }
-    
-    // Модалка с креденшелами
-    const credsModal = document.getElementById('credentialsModal');
-    const closeCredsModal = document.getElementById('closeCredsModal');
-    if (closeCredsModal) {
-        closeCredsModal.addEventListener('click', () => {
-            if (credsModal) credsModal.style.display = 'none';
-            document.body.style.overflow = '';
-        });
-    }
-    
-    const copyBtn = document.getElementById('copyCredentialsBtn');
-    if (copyBtn) {
-        copyBtn.addEventListener('click', () => {
-            const text = document.getElementById('credentialsContent')?.innerText;
-            if (text) {
-                navigator.clipboard.writeText(text);
-                alert('Данные скопированы в буфер обмена!');
-            }
-        });
-    }
-    
-    // Закрытие модалок по клику вне окна
-    window.addEventListener('click', (event) => {
-        if (event.target === document.getElementById('orderModal')) {
-            document.getElementById('orderModal').style.display = 'none';
-            document.body.style.overflow = '';
-        }
-        if (event.target === authModal) {
-            if (authModal) authModal.style.display = 'none';
-            document.body.style.overflow = '';
-        }
-        if (event.target === credsModal) {
-            if (credsModal) credsModal.style.display = 'none';
-            document.body.style.overflow = '';
-        }
-    });
-    
-    // Плавная прокрутка для якорей
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                window.scrollTo({
-                    top: targetElement.offsetTop - 70,
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-    
-    // Мобильное меню
-    document.querySelectorAll('.mobile-dropdown-trigger').forEach(trigger => {
-        trigger.addEventListener('click', function(e) {
-            e.preventDefault();
-            const dropdown = this.nextElementSibling;
-            this.classList.toggle('active');
-            if (dropdown) dropdown.classList.toggle('active');
-        });
-    });
-    
-    console.log('Скрипт инициализирован');
-});
