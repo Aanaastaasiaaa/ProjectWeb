@@ -13,6 +13,7 @@
     <div class="container nav-container">
         <a href="#" class="logo">Pizza<span>Mania</span></a>
 
+        <!-- Десктопное меню -->
         <ul class="nav-menu desktop-menu">
             <li class="nav-item"><a href="#home" class="nav-link">Главная</a></li>
             <li class="nav-item dropdown">
@@ -30,6 +31,7 @@
             <li class="nav-item"><button class="btn order-trigger-main">Связаться с нами</button></li>
         </ul>
 
+        <!-- Мобильное меню -->
         <ul class="mobile-nav">
             <li><a href="#home" class="mobile-nav-link">Главная</a></li>
             <li class="mobile-menu-item">
@@ -49,6 +51,7 @@
     </div>
 </nav>
 
+<!-- Шапка -->
 <header class="header" id="home">
     <video autoplay muted loop class="header-video">
         <source src="vid.mp4" type="video/mp4">
@@ -93,9 +96,45 @@
     </div>
 </section>
 
-<section class="section" id="about">...</section>
-<section class="section" id="gallery">...</section>
-<footer class="footer">...</footer>
+<!-- О НАС -->
+<section class="section" id="about">
+    <div class="container">
+        <h2 class="section-title">О нашей пиццерии</h2>
+        <div class="about-content">
+            <div class="about-text">
+                <p>Мы - семейная пиццерия с более чем 20-летним опытом приготовления настоящей итальянской пиццы.</p>
+                <p>Используем только свежие ингредиенты: настоящий сыр моцарелла, помидоры Сан-Марцано, свежий базилик.</p>
+                <p>Наша печь на дровах разогревается до 400°C, что позволяет приготовить пиццу всего за 90 секунд.</p>
+                <p>Доставляем заказы в течение 30 минут или пицца бесплатно!</p>
+            </div>
+            <div class="about-image">
+                <img src="pech.webp" alt="Пицца в печи">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ГАЛЕРЕЯ (СЛАЙДЕР) -->
+<section class="section" id="gallery">
+    <div class="container">
+        <h2 class="section-title">Наша галерея</h2>
+        <div class="slider" id="slider">
+            <div class="slider-track" id="sliderTrack"></div>
+            <button class="slider-nav slider-prev" id="sliderPrev">‹</button>
+            <button class="slider-nav slider-next" id="sliderNext">›</button>
+            <div class="slider-dots" id="sliderDots"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ФУТЕР -->
+<footer class="footer">
+    <div class="container">
+        <p>Ежедневно с 10:00 до 23:00</p>
+        <p>Телефон: +7 (999) 999-99-99</p>
+        <p class="copyright">© 2025 PizzaMania</p>
+    </div>
+</footer>
 
 <!-- ========== МОДАЛЬНОЕ ОКНО ТОВАРА ========== -->
 <div id="productModal" class="modal">
