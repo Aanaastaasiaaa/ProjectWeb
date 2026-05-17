@@ -280,20 +280,6 @@ body {
     font-size: 1.1rem;
 }
 
-/* Кнопка входа/выхода */
-.login-btn {
-    background: #ffd700;
-    color: #333 !important;
-    margin-left: 15px;
-    border-radius: 25px;
-    padding: 8px 20px !important;
-}
-
-.login-btn:hover {
-    background: #ffc107;
-    color: #333 !important;
-}
-
 /* Секции */
 .section {
     padding: 80px 0;
@@ -307,34 +293,7 @@ body {
     font-weight: 700;
 }
 
-/* Кнопки категорий меню */
-.menu-categories {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
-    margin-bottom: 40px;
-}
-
-.category-btn {
-    background: #f8f9fa;
-    border: 2px solid #dc3545;
-    color: #dc3545;
-    padding: 10px 25px;
-    border-radius: 30px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.category-btn:hover,
-.category-btn.active {
-    background: #dc3545;
-    color: white;
-}
-
-/* Категория меню */
+/* Категории меню */
 .menu-category {
     margin-bottom: 60px;
     scroll-margin-top: 100px;
@@ -354,7 +313,6 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 30px;
-    margin-top: 30px;
 }
 
 .menu-item {
@@ -518,12 +476,6 @@ body {
     z-index: 2000;
     justify-content: center;
     align-items: center;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
 }
 
 .modal-content {
@@ -535,12 +487,6 @@ body {
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
-    animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-    from { transform: translateY(50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-close {
@@ -560,11 +506,6 @@ body {
 }
 
 /* Формы */
-.order-modal-form {
-    background: white;
-    padding: 0;
-}
-
 .form-group {
     margin-bottom: 25px;
 }
@@ -614,10 +555,6 @@ body {
     border-left: 4px solid #dc3545;
 }
 
-.order-summary h3 {
-    margin-bottom: 10px;
-}
-
 #orderTotal {
     color: #dc3545;
     font-weight: 700;
@@ -650,13 +587,11 @@ body {
 .message.success {
     background: #d4edda;
     color: #155724;
-    border: 1px solid #c3e6cb;
 }
 
 .message.error {
     background: #f8d7da;
     color: #721c24;
-    border: 1px solid #f5c6cb;
 }
 
 /* Футер */
@@ -680,112 +615,20 @@ body {
 
 /* Адаптивность */
 @media (max-width: 768px) {
-    body {
-        padding-top: 200px;
-    }
-    
-    .header {
-        margin-top: -200px;
-        height: calc(100vh - 130px);
-        min-height: 500px;
-    }
-    
-    .desktop-menu {
-        display: none;
-    }
-    
-    .mobile-nav {
-        display: flex;
-    }
-    
-    .header h1 {
-        font-size: 2rem;
-    }
-    
-    .section-title {
-        font-size: 2rem;
-    }
-    
-    .form-row {
-        flex-direction: column;
-    }
-    
-    .modal-content {
-        padding: 30px 20px;
-    }
-    
-    .menu-categories {
-        gap: 10px;
-    }
-    
-    .category-btn {
-        padding: 8px 20px;
-        font-size: 0.9rem;
-    }
-    
-    .category-title {
-        font-size: 1.5rem;
-    }
+    body { padding-top: 200px; }
+    .header { margin-top: -200px; min-height: 500px; }
+    .desktop-menu { display: none; }
+    .mobile-nav { display: flex; }
+    .header h1 { font-size: 2rem; }
+    .section-title { font-size: 2rem; }
+    .form-row { flex-direction: column; }
+    .modal-content { padding: 30px 20px; }
+    .menu-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 576px) {
-    body {
-        padding-top: 180px;
-    }
-    
-    .header {
-        margin-top: -180px;
-        min-height: 450px;
-    }
-    
-    .header h1 {
-        font-size: 1.8rem;
-    }
-    
-    .section-title {
-        font-size: 1.8rem;
-    }
-    
-    .menu-grid {
-        grid-template-columns: 1fr;
-    }
-}
-/* Карточка товара (модальное окно) */
-.product-modal {
-    max-width: 500px;
-    text-align: center;
-}
-
-.product-modal img {
-    width: 100%;
-    max-height: 300px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-.product-modal h3 {
-    font-size: 2rem;
-    color: #dc3545;
-    margin-bottom: 15px;
-}
-
-.product-modal .product-description {
-    font-size: 1rem;
-    color: #555;
-    margin-bottom: 20px;
-    line-height: 1.6;
-}
-
-.product-modal .product-price {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #dc3545;
-    margin-bottom: 25px;
-}
-
-.product-modal .btn {
-    width: 100%;
-    padding: 12px;
-    font-size: 1.2rem;
+    body { padding-top: 180px; }
+    .header { margin-top: -180px; min-height: 450px; }
+    .header h1 { font-size: 1.8rem; }
+    .section-title { font-size: 1.8rem; }
 }
