@@ -13,7 +13,6 @@
     <div class="container nav-container">
         <a href="#" class="logo">Pizza<span>Mania</span></a>
 
-        <!-- Десктопное меню -->
         <ul class="nav-menu desktop-menu">
             <li class="nav-item"><a href="#home" class="nav-link">Главная</a></li>
             <li class="nav-item dropdown">
@@ -28,10 +27,9 @@
             </li>
             <li class="nav-item"><a href="#about" class="nav-link">О нас</a></li>
             <li class="nav-item"><a href="#gallery" class="nav-link">Галерея</a></li>
-            <li class="nav-item"><button class="btn order-trigger">Связаться с нами</button></li>
+            <li class="nav-item"><button class="btn order-trigger-main">Связаться с нами</button></li>
         </ul>
 
-        <!-- Мобильное меню -->
         <ul class="mobile-nav">
             <li><a href="#home" class="mobile-nav-link">Главная</a></li>
             <li class="mobile-menu-item">
@@ -46,7 +44,7 @@
             </li>
             <li><a href="#about" class="mobile-nav-link">О нас</a></li>
             <li><a href="#gallery" class="mobile-nav-link">Галерея</a></li>
-            <li><button class="btn order-trigger mobile-order-btn">Связаться с нами</button></li>
+            <li><button class="btn order-trigger-main mobile-order-btn">Связаться с нами</button></li>
         </ul>
     </div>
 </nav>
@@ -59,11 +57,11 @@
     <div class="header-content">
         <h1>Лучшая пицца в городе</h1>
         <p>Настоящая итальянская пицца с дровяной печи</p>
-        <button class="btn order-trigger">Заказать сейчас</button>
+        <button class="btn order-trigger-main">Заказать сейчас</button>
     </div>
 </header>
 
-<!-- ========== МЕНЮ С КАТЕГОРИЯМИ ========== -->
+<!-- МЕНЮ -->
 <section class="section" id="menu">
     <div class="container">
         <h2 class="section-title">Наше меню</h2>
@@ -95,161 +93,48 @@
     </div>
 </section>
 
-<section class="section" id="about">
-    <div class="container">
-        <h2 class="section-title">О нашей пиццерии</h2>
-        <div class="about-content">
-            <div class="about-text">
-                <p>Мы - семейная пиццерия с более чем 20-летним опытом приготовления настоящей итальянской пиццы.</p>
-                <p>Используем только свежие ингредиенты: настоящий сыр моцарелла, помидоры Сан-Марцано, свежий базилик.</p>
-                <p>Наша печь на дровах разогревается до 400°C, что позволяет приготовить пиццу всего за 90 секунд.</p>
-                <p>Доставляем заказы в течение 30 минут или пицца бесплатно!</p>
-            </div>
-            <div class="about-image">
-                <img src="pech.webp" alt="Пицца в печи">
-            </div>
-        </div>
-    </div>
-</section>
+<section class="section" id="about">...</section>
+<section class="section" id="gallery">...</section>
+<footer class="footer">...</footer>
 
-<section class="section" id="gallery">
-    <div class="container">
-        <h2 class="section-title">Наша галерея</h2>
-        <div class="slider" id="slider">
-            <div class="slider-track" id="sliderTrack"></div>
-            <button class="slider-nav slider-prev" id="sliderPrev">‹</button>
-            <button class="slider-nav slider-next" id="sliderNext">›</button>
-            <div class="slider-dots" id="sliderDots"></div>
-        </div>
+<!-- ========== МОДАЛЬНОЕ ОКНО ТОВАРА ========== -->
+<div id="productModal" class="modal">
+    <div class="modal-content product-modal">
+        <button id="closeProductModal" class="modal-close">×</button>
+        <img id="productImage" src="" alt="">
+        <h3 id="productName"></h3>
+        <div class="product-description" id="productDesc"></div>
+        <div class="product-price" id="productPrice"></div>
+        <button id="orderFromProductBtn" class="btn">Заказать</button>
     </div>
-</section>
-
-<footer class="footer">
-    <div class="container">
-        <p>Ежедневно с 10:00 до 23:00</p>
-        <p>Телефон: +7 (999) 999-99-99</p>
-        <p class="copyright">© 2025 PizzaMania</p>
-    </div>
-</footer>
+</div>
 
 <!-- ========== МОДАЛЬНОЕ ОКНО ЗАКАЗА ========== -->
 <div id="orderModal" class="modal">
     <div class="modal-content">
         <button id="closeOrderModal" class="modal-close">×</button>
         <h2>Оформление заказа</h2>
-        <p class="modal-subtitle">Заполните форму для быстрого оформления заказа</p>
-
-        <form id="orderModalForm" class="order-modal-form" action="https://formcarry.com/s/ZR_aiSuf9jL" method="POST" accept-charset="UTF-8">
-            <input type="hidden" name="_gotcha">
-
+        <form id="orderModalForm">
             <div class="form-group">
-                <label for="modalName">Ваше имя *</label>
-                <input type="text" id="modalName" name="Имя" class="form-control" required>
+                <label>Ваше имя *</label>
+                <input type="text" id="orderName" name="name" class="form-control" required>
             </div>
-
             <div class="form-group">
-                <label for="modalPhone">Телефон *</label>
-                <input type="tel" id="modalPhone" name="Телефон" class="form-control" required placeholder="+7 (999) 999-99-99">
+                <label>Телефон *</label>
+                <input type="tel" id="orderPhone" name="phone" class="form-control" required>
             </div>
-
             <div class="form-group">
-                <label for="modalEmail">Email</label>
-                <input type="email" id="modalEmail" name="Email" class="form-control">
+                <label>Email</label>
+                <input type="email" id="orderEmail" name="email" class="form-control">
             </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="modalPizza">Выберите позицию *</label>
-                    <select id="modalPizza" name="Позиция" class="form-control" required>
-                        <option value="">-- Выберите --</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="modalSize">Размер (для пиццы)</label>
-                    <select id="modalSize" name="Размер" class="form-control">
-                        <option value="Маленькая (25 см)">Маленькая (25 см)</option>
-                        <option value="Средняя (30 см)" selected>Средняя (30 см)</option>
-                        <option value="Большая (35 см)">Большая (35 см)</option>
-                        <option value="Огромная (40 см)">Огромная (40 см)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="modalQuantity">Количество *</label>
-                    <select id="modalQuantity" name="Количество" class="form-control" required>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="modalDelivery">Способ получения</label>
-                    <select id="modalDelivery" name="Способ получения" class="form-control">
-                        <option value="Доставка" selected>Доставка</option>
-                        <option value="Самовывоз">Самовывоз</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group" id="addressField">
-                <label for="modalAddress">Адрес доставки *</label>
-                <textarea id="modalAddress" name="Адрес" class="form-control" rows="3" required placeholder="Улица, дом, квартира"></textarea>
-            </div>
-
             <div class="form-group">
-                <label for="modalTime">Желаемое время</label>
-                <div class="form-row">
-                    <div class="form-group">
-                        <select id="modalDate" name="Дата" class="form-control">
-                            <option value="Сегодня">Сегодня</option>
-                            <option value="Завтра">Завтра</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <select id="modalHour" name="Время" class="form-control">
-                            <option value="Как можно скорее">Как можно скорее</option>
-                            <option value="12:00">12:00</option>
-                            <option value="13:00">13:00</option>
-                            <option value="14:00">14:00</option>
-                            <option value="15:00">15:00</option>
-                            <option value="16:00">16:00</option>
-                            <option value="17:00">17:00</option>
-                            <option value="18:00">18:00</option>
-                            <option value="19:00">19:00</option>
-                            <option value="20:00">20:00</option>
-                            <option value="21:00">21:00</option>
-                            <option value="22:00">22:00</option>
-                        </select>
-                    </div>
-                </div>
+                <label>Адрес доставки</label>
+                <textarea id="orderAddress" name="address" class="form-control" rows="2"></textarea>
             </div>
-
-            <div class="form-group">
-                <label for="modalComments">Комментарии к заказу</label>
-                <textarea id="modalComments" name="Комментарии" class="form-control" rows="3" placeholder="Дополнительные пожелания..."></textarea>
-            </div>
-
-            <div class="form-group checkbox-group">
-                <input type="checkbox" id="modalAgree" name="Согласие" required>
-                <label for="modalAgree">Я согласен на обработку персональных данных и с условиями доставки</label>
-            </div>
-
             <div class="order-summary">
-                <h3>Сумма заказа: <span id="orderTotal">450 ₽</span></h3>
+                <h3>Сумма: <span id="orderTotal">0 ₽</span></h3>
             </div>
-
-            <div id="orderMessageContainer"></div>
-
-            <button type="submit" class="btn" id="modalSubmitBtn" style="width: 100%; padding: 15px; font-size: 1.2rem;">
-                Оформить заказ
-            </button>
+            <button type="submit" class="btn" style="width:100%">Оформить</button>
         </form>
     </div>
 </div>
@@ -258,16 +143,10 @@
 <div id="authModal" class="modal">
     <div class="modal-content" style="max-width: 400px;">
         <button id="closeAuthModal" class="modal-close">×</button>
-        <h2>Вход в личный кабинет</h2>
+        <h2>Вход</h2>
         <form id="authForm">
-            <div class="form-group">
-                <label>Логин</label>
-                <input type="text" id="authLogin" required class="form-control">
-            </div>
-            <div class="form-group">
-                <label>Пароль</label>
-                <input type="password" id="authPassword" required class="form-control">
-            </div>
+            <input type="text" id="authLogin" placeholder="Логин" class="form-control" required>
+            <input type="password" id="authPassword" placeholder="Пароль" class="form-control" required>
             <div id="authMessage"></div>
             <button type="submit" class="btn" style="width:100%">Войти</button>
         </form>
@@ -278,9 +157,9 @@
 <div id="credentialsModal" class="modal">
     <div class="modal-content" style="max-width: 400px;">
         <button id="closeCredsModal" class="modal-close">×</button>
-        <h2>🎉 Вы зарегистрированы!</h2>
+        <h2>Регистрация</h2>
         <div id="credentialsContent"></div>
-        <button id="copyCredentialsBtn" class="btn" style="width:100%; margin-top:15px;">Скопировать данные</button>
+        <button id="copyCredentialsBtn" class="btn">Скопировать</button>
     </div>
 </div>
 
