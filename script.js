@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM загружен');
 
     // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
-    let currentPizzaPrice = 450;
+    let currentProduct = null;
     const API_URL = '/api.php';
 
     // ========== ДАННЫЕ МЕНЮ (ПОЛНЫЙ КАТАЛОГ) ==========
@@ -45,6 +45,61 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // ========== КАРТОЧКА ТОВАРА (МОДАЛЬНОЕ ОКНО) ==========
+    function showProductModal(product) {
+        currentProduct = product;
+
+        // Создаём модальное окно, если его ещё нет
+        let modal = document.getElementById('productModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'productModal';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content product-modal">
+                    <button id="closeProductModal" class="modal-close">×</button>
+                    <img id="productImage" src="" alt="">
+                    <h3 id="productName"></h3>
+                    <div class="product-description" id="productDesc"></div>
+                    <div class="product-price" id="productPrice"></div>
+                    <button id="orderFromProductBtn" class="btn">Заказать</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Закрытие по крестику
+            document.getElementById('closeProductModal').addEventListener('click', () => {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+            });
+
+            // Кнопка "Заказать" из карточки
+            document.getElementById('orderFromProductBtn').addEventListener('click', () => {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+                openOrderModal(currentProduct.name, currentProduct.price);
+            });
+
+            // Закрытие по клику вне окна
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+
+        // Заполняем карточку данными
+        document.getElementById('productImage').src = `images/${product.image}`;
+        document.getElementById('productImage').alt = product.name;
+        document.getElementById('productName').innerText = product.name;
+        document.getElementById('productDesc').innerText = product.description;
+        document.getElementById('productPrice').innerHTML = `${product.price} ₽`;
+
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
     // ========== ЗАГРУЗКА МЕНЮ ПО КАТЕГОРИЯМ ==========
     function loadCategory(category, containerId) {
         const container = document.getElementById(containerId);
@@ -52,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
         container.innerHTML = '';
         const items = menuData[category];
         if (!items) return;
-        
+
         items.forEach(item => {
             const menuItem = document.createElement('div');
             menuItem.className = 'menu-item';
@@ -62,11 +117,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     <h3 class="menu-item-title">${escapeHtml(item.name)}</h3>
                     <p>${escapeHtml(item.description)}</p>
                     <div class="menu-item-price">${item.price} ₽</div>
-                    <button class="btn order-trigger" data-pizza="${escapeHtml(item.name)}" data-price="${item.price}">Заказать</button>
+                    <button class="btn view-product-btn" data-name="${escapeHtml(item.name)}" data-price="${item.price}" data-desc="${escapeHtml(item.description)}" data-img="${item.image}">Подробнее</button>
                 </div>
             `;
             container.appendChild(menuItem);
         });
+
+        // Назначаем обработчики на кнопки "Подробнее"
+        document.querySelectorAll('.view-product-btn').forEach(btn => {
+            btn.removeEventListener('click', productButtonHandler);
+            btn.addEventListener('click', productButtonHandler);
+        });
+    }
+
+    function productButtonHandler(e) {
+        e.preventDefault();
+        const btn = e.currentTarget;
+        const product = {
+            name: btn.getAttribute('data-name'),
+            price: parseInt(btn.getAttribute('data-price')),
+            description: btn.getAttribute('data-desc'),
+            image: btn.getAttribute('data-img')
+        };
+        showProductModal(product);
     }
 
     function loadAllCategories() {
@@ -75,26 +148,14 @@ document.addEventListener('DOMContentLoaded', function() {
         loadCategory('salads', 'salads-grid');
         loadCategory('drinks', 'drinks-grid');
         loadCategory('desserts', 'desserts-grid');
-        
-        document.querySelectorAll('.order-trigger').forEach(btn => {
-            btn.removeEventListener('click', orderButtonHandler);
-            btn.addEventListener('click', orderButtonHandler);
-        });
-    }
-
-    function orderButtonHandler(e) {
-        e.preventDefault();
-        const pizzaName = e.currentTarget.getAttribute('data-pizza');
-        const pizzaPrice = parseInt(e.currentTarget.getAttribute('data-price'));
-        openOrderModal(pizzaName, pizzaPrice);
     }
 
     // ========== МОДАЛЬНОЕ ОКНО ЗАКАЗА ==========
     function openOrderModal(pizzaName = '', pizzaPrice = null) {
-        if (pizzaPrice) currentPizzaPrice = pizzaPrice;
+        if (pizzaPrice) currentProduct = { name: pizzaName, price: pizzaPrice };
         const modal = document.getElementById('orderModal');
         const pizzaSelect = document.getElementById('modalPizza');
-        
+
         if (pizzaName && pizzaSelect) {
             for (let opt of pizzaSelect.options) {
                 if (opt.value === pizzaName || opt.text.includes(pizzaName)) {
@@ -115,7 +176,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const quantitySelect = document.getElementById('modalQuantity');
         let quantity = 1;
         if (quantitySelect) quantity = parseInt(quantitySelect.value) || 1;
-        const total = currentPizzaPrice * quantity;
+        let price = 450;
+        if (currentProduct && currentProduct.price) price = currentProduct.price;
+        const total = price * quantity;
         if (totalSpan) totalSpan.textContent = total + ' ₽';
     }
 
@@ -155,15 +218,15 @@ document.addEventListener('DOMContentLoaded', function() {
             agreement: formData.get('agreement') === 'on',
             total: document.getElementById('orderTotal')?.textContent || '0'
         };
-        
+
         const response = await fetch(API_URL + '/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-        
+
         const result = await response.json();
-        
+
         if (response.ok) {
             const msgContainer = document.getElementById('orderMessageContainer');
             if (msgContainer) {
@@ -225,9 +288,9 @@ document.addEventListener('DOMContentLoaded', function() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ login, password })
         });
-        
+
         const result = await response.json();
-        
+
         if (response.ok) {
             alert('Добро пожаловать, ' + result.user.full_name + '!');
             document.getElementById('authModal').style.display = 'none';
@@ -265,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupCategoryButtons() {
         const buttons = document.querySelectorAll('.category-btn');
         const categories = ['pizza', 'pasta', 'salads', 'drinks', 'desserts'];
-        
+
         buttons.forEach((btn, index) => {
             btn.addEventListener('click', () => {
                 buttons.forEach(b => b.classList.remove('active'));
@@ -295,46 +358,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function setupScrollSpy() {
-        const sections = ['pizza-section', 'pasta-section', 'salads-section', 'drinks-section', 'desserts-section'];
-        const buttons = document.querySelectorAll('.category-btn');
-        
-        window.addEventListener('scroll', () => {
-            let current = '';
-            const scrollPosition = window.scrollY + 150;
-            for (const section of sections) {
-                const element = document.getElementById(section);
-                if (element) {
-                    const offsetTop = element.offsetTop;
-                    const offsetBottom = offsetTop + element.offsetHeight;
-                    if (scrollPosition >= offsetTop && scrollPosition < offsetBottom) {
-                        current = section.replace('-section', '');
-                        break;
-                    }
-                }
-            }
-            buttons.forEach((btn, index) => {
-                const category = btn.getAttribute('data-category');
-                if (category === current) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        });
-    }
-
     // ========== СЛАЙДЕР ==========
     const slides = [
         { image: "images/з.webp", caption: "Наша фирменная печь на дровах" },
         { image: "images/ing.jpg", caption: "Свежие ингредиенты высшего качества" },
         { image: "images/kor.webp", caption: "Идеальная хрустящая корочка" }
     ];
-    
+
     const sliderTrack = document.getElementById('sliderTrack');
     const sliderDots = document.getElementById('sliderDots');
     let currentSlide = 0;
-    
+
     if (sliderTrack && sliderDots) {
         slides.forEach((slide, index) => {
             const slideElement = document.createElement('div');
@@ -346,7 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
             dot.addEventListener('click', () => goToSlide(index));
             sliderDots.appendChild(dot);
         });
-        
+
         function goToSlide(index) {
             currentSlide = index;
             sliderTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
@@ -354,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 dot.classList.toggle('active', i === currentSlide);
             });
         }
-        
+
         document.getElementById('sliderPrev')?.addEventListener('click', () => {
             currentSlide = (currentSlide - 1 + slides.length) % slides.length;
             goToSlide(currentSlide);
@@ -370,8 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadAllCategories();
     setupCategoryButtons();
     setupDropdownLinks();
-    setupScrollSpy();
-    
+
     // Форма заказа
     const orderForm = document.getElementById('orderModalForm');
     if (orderForm) {
@@ -381,30 +414,94 @@ document.addEventListener('DOMContentLoaded', function() {
             await submitOrderViaAPI(formData);
         });
     }
-    
-    // Закрытие модалки заказа
+
     document.getElementById('closeOrderModal')?.addEventListener('click', () => {
         document.getElementById('orderModal').style.display = 'none';
         document.body.style.overflow = '';
     });
-    
-    // Способ получения
+
     document.getElementById('modalDelivery')?.addEventListener('change', updateAddressField);
     updateAddressField();
     document.getElementById('modalQuantity')?.addEventListener('change', updateOrderTotal);
-    
-    // Авторизация
+
     document.getElementById('authForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const login = document.getElementById('authLogin').value;
         const password = document.getElementById('authPassword').value;
         await loginUser(login, password);
     });
-    
-    // Кнопка входа
+
     const authModal = document.getElementById('authModal');
     const loginNavBtn = document.createElement('a');
     loginNavBtn.id = 'loginNavBtn';
     loginNavBtn.href = '#';
     loginNavBtn.className = 'btn login-btn';
     loginNavBtn.textContent = 'Войти';
+    loginNavBtn.onclick = (e) => {
+        e.preventDefault();
+        if (authModal) authModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    };
+    const desktopMenu = document.querySelector('.desktop-menu');
+    if (desktopMenu) desktopMenu.appendChild(loginNavBtn);
+
+    document.getElementById('closeAuthModal')?.addEventListener('click', () => {
+        if (authModal) authModal.style.display = 'none';
+        document.body.style.overflow = '';
+    });
+
+    const credsModal = document.getElementById('credentialsModal');
+    document.getElementById('closeCredsModal')?.addEventListener('click', () => {
+        if (credsModal) credsModal.style.display = 'none';
+        document.body.style.overflow = '';
+    });
+
+    document.getElementById('copyCredentialsBtn')?.addEventListener('click', () => {
+        const text = document.getElementById('credentialsContent')?.innerText;
+        if (text) {
+            navigator.clipboard.writeText(text);
+            alert('Данные скопированы!');
+        }
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === document.getElementById('orderModal')) {
+            document.getElementById('orderModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        if (event.target === authModal) {
+            if (authModal) authModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        if (event.target === credsModal) {
+            if (credsModal) credsModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            if (targetId === '#') return;
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop - 70,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
+    document.querySelectorAll('.mobile-dropdown-trigger').forEach(trigger => {
+        trigger.addEventListener('click', function(e) {
+            e.preventDefault();
+            const dropdown = this.nextElementSibling;
+            this.classList.toggle('active');
+            if (dropdown) dropdown.classList.toggle('active');
+        });
+    });
+
+    console.log('Скрипт инициализирован');
+});
