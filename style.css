@@ -632,3 +632,28 @@ body {
     .header h1 { font-size: 1.8rem; }
     .section-title { font-size: 1.8rem; }
 }
+.product-modal {
+    text-align: center;
+}
+.product-modal img {
+    width: 100%;
+    max-height: 250px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+.product-modal h3 {
+    font-size: 1.8rem;
+    color: #dc3545;
+    margin-bottom: 10px;
+}
+.product-description {
+    color: #555;
+    margin-bottom: 15px;
+}
+.product-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #dc3545;
+    margin-bottom: 20px;
+}
