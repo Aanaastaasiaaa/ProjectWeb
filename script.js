@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    // ========== ДАННЫЕ МЕНЮ (ПОЛНЫЙ КАТАЛОГ) ==========
+    // ДАННЫЕ МЕНЮ
     const menuData = {
         pizza: [
             { name: "Маргарита", desc: "Томатный соус, моцарелла, базилик", price: 450, image: "margarita.webp" },
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ]
     };
 
-    // ========== РЕНДЕР МЕНЮ В ГРИД ==========
+    // РЕНДЕР КАТЕГОРИЙ
     function renderCategory(cat, containerId) {
         const container = document.getElementById(containerId);
         if (!container) return;
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
             div.innerHTML = `
                 <img src="${item.image}" alt="${item.name}">
                 <div class="menu-item-content">
-                    <h3 class="menu-item-title">${item.name}</h3>
+                    <h3>${item.name}</h3>
                     <p>${item.desc}</p>
                     <div class="menu-item-price">${item.price} ₽</div>
                     <button class="btn view-product" data-name="${item.name}" data-price="${item.price}" data-desc="${item.desc}" data-img="${item.image}">Подробнее</button>
@@ -52,67 +52,60 @@ document.addEventListener('DOMContentLoaded', function() {
     renderCategory('drinks', 'drinksGrid');
     renderCategory('desserts', 'dessertsGrid');
 
-    // ========== МОДАЛЬНОЕ ОКНО ТОВАРА ==========
+    // МОДАЛКА ТОВАРА
     const productModal = document.getElementById('productModal');
     const closeProductModal = document.getElementById('closeProductModal');
 
     document.querySelectorAll('.view-product').forEach(btn => {
         btn.addEventListener('click', () => {
-            const name = btn.dataset.name;
-            const price = btn.dataset.price;
-            const desc = btn.dataset.desc;
-            const img = btn.dataset.img;
-            document.getElementById('productImage').src = img;
-            document.getElementById('productName').innerText = name;
-            document.getElementById('productDesc').innerText = desc;
-            document.getElementById('productPrice').innerHTML = price + ' ₽';
-            window.currentProduct = { name, price };
+            document.getElementById('productImage').src = btn.dataset.img;
+            document.getElementById('productName').innerText = btn.dataset.name;
+            document.getElementById('productDesc').innerText = btn.dataset.desc;
+            document.getElementById('productPrice').innerHTML = btn.dataset.price + ' ₽';
+            window.currentProduct = { name: btn.dataset.name, price: btn.dataset.price };
             productModal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
         });
     });
 
-    closeProductModal?.addEventListener('click', () => {
+    closeProductModal.addEventListener('click', () => {
         productModal.style.display = 'none';
         document.body.style.overflow = '';
     });
 
-    // ========== МОДАЛЬНОЕ ОКНО ЗАКАЗА ==========
+    // МОДАЛКА ЗАКАЗА
     const orderModal = document.getElementById('orderModal');
     const closeOrderModal = document.getElementById('closeOrderModal');
-    const orderTotalSpan = document.getElementById('orderTotal');
-    const orderProductSelect = document.getElementById('orderProduct');
-    const orderQuantitySelect = document.getElementById('orderQuantity');
+    const orderProduct = document.getElementById('orderProduct');
+    const orderQuantity = document.getElementById('orderQuantity');
+    const orderTotal = document.getElementById('orderTotal');
 
-    function updateOrderTotal() {
-        const selected = orderProductSelect.value;
-        if (!selected) {
-            orderTotalSpan.innerText = '0 ₽';
-            return;
-        }
-        const price = parseInt(selected.split('|')[1]) || 0;
-        const quantity = parseInt(orderQuantitySelect.value) || 1;
-        orderTotalSpan.innerText = (price * quantity) + ' ₽';
+    function updateTotal() {
+        const val = orderProduct.value;
+        if (!val) { orderTotal.innerText = '0 ₽'; return; }
+        const price = parseInt(val.split('|')[1]) || 0;
+        const qty = parseInt(orderQuantity.value) || 1;
+        orderTotal.innerText = (price * qty) + ' ₽';
     }
 
-    orderProductSelect?.addEventListener('change', updateOrderTotal);
-    orderQuantitySelect?.addEventListener('change', updateOrderTotal);
+    orderProduct.addEventListener('change', updateTotal);
+    orderQuantity.addEventListener('change', updateTotal);
 
     function openOrderModal(product = null) {
         if (product) {
-            for (let opt of orderProductSelect.options) {
+            for (let opt of orderProduct.options) {
                 if (opt.value.startsWith(product.name + '|')) {
                     opt.selected = true;
                     break;
                 }
             }
-            updateOrderTotal();
+            updateTotal();
         }
         orderModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
 
-    document.getElementById('orderFromProductBtn')?.addEventListener('click', () => {
+    document.getElementById('orderFromProductBtn').addEventListener('click', () => {
         productModal.style.display = 'none';
         openOrderModal(window.currentProduct);
     });
@@ -121,50 +114,61 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', () => openOrderModal());
     });
 
-    closeOrderModal?.addEventListener('click', () => {
+    closeOrderModal.addEventListener('click', () => {
         orderModal.style.display = 'none';
         document.body.style.overflow = '';
     });
 
-    // Отправка заказа (демо)
-    document.getElementById('orderModalForm')?.addEventListener('submit', async (e) => {
+    document.getElementById('orderModalForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const name = document.getElementById('orderName').value;
         const phone = document.getElementById('orderPhone').value;
-        if (!name || !phone || !orderProductSelect.value) {
+        if (!name || !phone || !orderProduct.value) {
             alert('Заполните имя, телефон и выберите позицию');
             return;
         }
-        alert(`Заказ отправлен!\nПозиция: ${orderProductSelect.options[orderProductSelect.selectedIndex].text}\nСумма: ${orderTotalSpan.innerText}`);
+        alert(`Заказ отправлен!\nСумма: ${orderTotal.innerText}`);
         orderModal.style.display = 'none';
         document.body.style.overflow = '';
     });
 
-    // ========== ПЛАВНАЯ ПРОКРУТКА ==========
-    document.querySelectorAll('.dropdown-menu a, .mobile-dropdown a, .order-trigger-main').forEach(anchor => {
+    // ПЛАВНАЯ ПРОКРУТКА
+    document.querySelectorAll('.dropdown-menu a, .mobile-dropdown a').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
             if (href && href.startsWith('#')) {
                 e.preventDefault();
-                const target = document.querySelector(href);
-                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                document.querySelector(href)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
     });
 
-    // Мобильное меню
+    // МОБИЛЬНОЕ МЕНЮ
     document.querySelectorAll('.mobile-dropdown-trigger').forEach(trigger => {
-        trigger.addEventListener('click', function(e) {
+        trigger.addEventListener('click', (e) => {
             e.preventDefault();
-            this.nextElementSibling?.classList.toggle('active');
+            trigger.nextElementSibling?.classList.toggle('active');
         });
     });
 
-    // Закрытие модалок по клику вне окна
+    // ЗАКРЫТИЕ МОДАЛОК ПО КЛИКУ ВНЕ ОКНА
     window.addEventListener('click', (e) => {
-        if (e.target === productModal) { productModal.style.display = 'none'; document.body.style.overflow = ''; }
-        if (e.target === orderModal) { orderModal.style.display = 'none'; document.body.style.overflow = ''; }
-        if (e.target === document.getElementById('authModal')) { document.getElementById('authModal').style.display = 'none'; document.body.style.overflow = ''; }
-        if (e.target === document.getElementById('credentialsModal')) { document.getElementById('credentialsModal').style.display = 'none'; document.body.style.overflow = ''; }
+        if (e.target === productModal) {
+            productModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        if (e.target === orderModal) {
+            orderModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        if (e.target === document.getElementById('authModal')) {
+            document.getElementById('authModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        if (e.target === document.getElementById('credentialsModal')) {
+            document.getElementById('credentialsModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
     });
+
 });
