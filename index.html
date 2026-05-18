@@ -27,7 +27,9 @@
             </li>
             <li class="nav-item"><a href="#about" class="nav-link">О нас</a></li>
             <li class="nav-item"><a href="#gallery" class="nav-link">Галерея</a></li>
-            <li class="nav-item"><button class="btn order-trigger-main">Связаться с нами</button></li>
+            <li class="nav-item"><span id="userDisplay" class="user-display"></span></li>
+            <li class="nav-item"><button class="btn login-btn" id="loginBtn">Войти</button></li>
+            <li class="nav-item"><button class="btn order-trigger-main" id="orderBtn" style="display:none;">Заказать</button></li>
         </ul>
 
         <ul class="mobile-nav">
@@ -44,7 +46,8 @@
             </li>
             <li><a href="#about" class="mobile-nav-link">О нас</a></li>
             <li><a href="#gallery" class="mobile-nav-link">Галерея</a></li>
-            <li><button class="btn order-trigger-main mobile-order-btn">Связаться с нами</button></li>
+            <li><button class="btn login-btn" id="mobileLoginBtn">Войти</button></li>
+            <li><button class="btn order-trigger-main" id="mobileOrderBtn" style="display:none;">Заказать</button></li>
         </ul>
     </div>
 </nav>
@@ -57,19 +60,50 @@
     <div class="header-content">
         <h1>Лучшая пицца в городе</h1>
         <p>Настоящая итальянская пицца с дровяной печи</p>
-        <button class="btn order-trigger-main">Заказать сейчас</button>
+        <button class="btn order-trigger-main" id="headerOrderBtn">Заказать сейчас</button>
     </div>
 </header>
 
-<!-- Menu -->
-<section class="section" id="menu">
+<!-- Пицца -->
+<section class="section" id="pizza">
     <div class="container">
-        <h2 class="section-title">Наше меню</h2>
-        <div class="menu-grid" id="menuGrid"></div>
+        <h3 class="category-title">🍕 Пицца</h3>
+        <div class="menu-grid" id="pizzaGrid"></div>
     </div>
 </section>
 
-<!-- About -->
+<!-- Паста -->
+<section class="section" id="pasta">
+    <div class="container">
+        <h3 class="category-title">🍝 Паста</h3>
+        <div class="menu-grid" id="pastaGrid"></div>
+    </div>
+</section>
+
+<!-- Салаты -->
+<section class="section" id="salads">
+    <div class="container">
+        <h3 class="category-title">🥗 Салаты</h3>
+        <div class="menu-grid" id="saladsGrid"></div>
+    </div>
+</section>
+
+<!-- Напитки -->
+<section class="section" id="drinks">
+    <div class="container">
+        <h3 class="category-title">🥤 Напитки</h3>
+        <div class="menu-grid" id="drinksGrid"></div>
+    </div>
+</section>
+
+<!-- Десерты -->
+<section class="section" id="desserts">
+    <div class="container">
+        <h3 class="category-title">🍰 Десерты</h3>
+        <div class="menu-grid" id="dessertsGrid"></div>
+    </div>
+</section>
+
 <section class="section" id="about">
     <div class="container">
         <h2 class="section-title">О нашей пиццерии</h2>
@@ -87,7 +121,6 @@
     </div>
 </section>
 
-<!-- Gallery -->
 <section class="section" id="gallery">
     <div class="container">
         <h2 class="section-title">Наша галерея</h2>
@@ -108,7 +141,7 @@
     </div>
 </footer>
 
-<!-- Модальное окно товара (Подробнее) -->
+<!-- Модальное окно товара -->
 <div id="productModal" class="modal">
     <div class="modal-content product-modal">
         <button id="closeProductModal" class="modal-close">×</button>
@@ -120,7 +153,7 @@
     </div>
 </div>
 
-<!-- Модальное окно заказа (анкета с корзиной) -->
+<!-- Модальное окно заказа -->
 <div id="orderModal" class="modal">
     <div class="modal-content" style="max-width: 750px;">
         <button id="closeOrderModal" class="modal-close">×</button>
@@ -153,6 +186,39 @@
 
             <button type="submit" class="btn" style="width:100%; margin-top:20px">Оформить заказ</button>
         </form>
+    </div>
+</div>
+
+<!-- Модальное окно входа/регистрации -->
+<div id="authModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <button id="closeAuthModal" class="modal-close">×</button>
+        <h2>Вход</h2>
+        <form id="authForm">
+            <div class="form-group">
+                <label>Логин</label>
+                <input type="text" id="authLogin" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" id="authPassword" class="form-control" required>
+            </div>
+            <div id="authMessage"></div>
+            <button type="submit" class="btn" style="width:100%">Войти</button>
+        </form>
+        <hr>
+        <p style="text-align:center">Нет аккаунта? После первого заказа мы пришлём логин и пароль.</p>
+    </div>
+</div>
+
+<!-- Модальное окно с логином/паролем -->
+<div id="credsModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <button id="closeCredsModal" class="modal-close">×</button>
+        <h2>Ваши данные для входа</h2>
+        <p><strong>Логин:</strong> <span id="credsLogin"></span></p>
+        <p><strong>Пароль:</strong> <span id="credsPassword"></span></p>
+        <button id="copyCredsBtn" class="btn" style="width:100%">Скопировать</button>
     </div>
 </div>
 
