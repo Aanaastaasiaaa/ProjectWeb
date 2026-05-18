@@ -153,7 +153,7 @@
     </div>
 </div>
 
-<!-- Модальное окно заказа -->
+<!-- Модальное окно заказа (только для авторизованных) -->
 <div id="orderModal" class="modal">
     <div class="modal-content" style="max-width: 750px;">
         <button id="closeOrderModal" class="modal-close">×</button>
@@ -189,7 +189,38 @@
     </div>
 </div>
 
-<!-- Модальное окно входа/регистрации -->
+<!-- Модальное окно регистрации (первый шаг) -->
+<div id="registerModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <button id="closeRegisterModal" class="modal-close">×</button>
+        <h2>Регистрация</h2>
+        <p class="modal-subtitle">Заполните форму, чтобы создать аккаунт</p>
+        <form id="registerForm">
+            <div class="form-group">
+                <label>Ваше имя *</label>
+                <input type="text" id="regName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Телефон *</label>
+                <input type="tel" id="regPhone" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="regEmail" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Адрес доставки</label>
+                <textarea id="regAddress" class="form-control" rows="2"></textarea>
+            </div>
+            <div id="registerMessage"></div>
+            <button type="submit" class="btn" style="width:100%">Зарегистрироваться</button>
+        </form>
+        <hr>
+        <p style="text-align:center; margin-top:15px;">Уже есть аккаунт? <a href="#" id="showLoginFromReg">Войти</a></p>
+    </div>
+</div>
+
+<!-- Модальное окно входа -->
 <div id="authModal" class="modal">
     <div class="modal-content" style="max-width: 400px;">
         <button id="closeAuthModal" class="modal-close">×</button>
@@ -207,7 +238,7 @@
             <button type="submit" class="btn" style="width:100%">Войти</button>
         </form>
         <hr>
-        <p style="text-align:center">Нет аккаунта? После первого заказа мы пришлём логин и пароль.</p>
+        <p style="text-align:center; margin-top:15px;">Нет аккаунта? <a href="#" id="showRegFromLogin">Зарегистрироваться</a></p>
     </div>
 </div>
 
@@ -215,10 +246,13 @@
 <div id="credsModal" class="modal">
     <div class="modal-content" style="max-width: 400px;">
         <button id="closeCredsModal" class="modal-close">×</button>
-        <h2>Ваши данные для входа</h2>
+        <h2>Регистрация завершена!</h2>
+        <p>Ваши данные для входа:</p>
         <p><strong>Логин:</strong> <span id="credsLogin"></span></p>
         <p><strong>Пароль:</strong> <span id="credsPassword"></span></p>
-        <button id="copyCredsBtn" class="btn" style="width:100%">Скопировать</button>
+        <p class="warning">Сохраните их! Они показываются только один раз.</p>
+        <button id="copyCredsBtn" class="btn" style="width:100%">Скопировать данные</button>
+        <button id="goToLoginBtn" class="btn" style="width:100%; margin-top:10px; background:#28a745;">Перейти ко входу</button>
     </div>
 </div>
 
