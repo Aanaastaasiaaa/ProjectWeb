@@ -1,85 +1,61 @@
 <?php
-// api.php
 header('Content-Type: application/json');
-require_once 'functions.php';
 
 session_start();
 
-$method = $_SERVER['REQUEST_METHOD'];
-$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$path = str_replace('/api.php', '', $path);
+// Подключение к БД (как в задании 5)
+$host = 'localhost';
+$dbname = 'u82277';
+$user = 'u82277';
+$pass = '1452026';
 
-$pdo = getDB();
-
-// GET /pizzas - получить список пицц
-if ($method === 'GET' && $path === '/pizzas') {
-    $stmt = $pdo->query("SELECT id, name, description, price, image FROM pizzas");
-    echo json_encode($stmt->fetchAll());
-    exit;
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch(PDOException $e) {
+    die(json_encode(['error' => 'DB connection failed']));
 }
 
-// POST /orders - создать заказ
-if ($method === 'POST' && $path === '/orders') {
+$method = $_SERVER['REQUEST_METHOD'];
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+// POST /api.php/orders - создание заказа
+if ($method === 'POST' && $path === '/api.php/orders') {
     $data = json_decode(file_get_contents('php://input'), true);
     
-    // Валидация
-    $errors = validateOrderData($data);
-    if (!empty($errors)) {
-        http_response_code(400);
-        echo json_encode(['errors' => $errors]);
+    // Простейшая валидация
+    if (empty($data['name']) || empty($data['phone'])) {
+        echo json_encode(['error' => 'Имя и телефон обязательны']);
         exit;
     }
     
     $pdo->beginTransaction();
     
-    // Проверяем авторизацию
+    // Проверяем, есть ли пользователь в сессии (авторизован)
     if (isset($_SESSION['user_id'])) {
-        $user_id = $_SESSION['user_id'];
+        $userId = $_SESSION['user_id'];
     } else {
-        // Новый пользователь
-        $creds = generateCredentials();
-        $stmt = $pdo->prepare("
-            INSERT INTO pizza_users (full_name, phone, email, address, login, password_hash)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ");
-        $stmt->execute([
-            $data['name'],
-            $data['phone'],
-            $data['email'] ?? '',
-            $data['address'] ?? '',
-            $creds['login'],
-            password_hash($creds['password'], PASSWORD_DEFAULT)
-        ]);
-        $user_id = $pdo->lastInsertId();
-        $_SESSION['new_credentials'] = $creds;
+        // Генерация логина и пароля (как в задании 5)
+        $login = 'user_' . bin2hex(random_bytes(4));
+        $password = bin2hex(random_bytes(8));
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        
+        $stmt = $pdo->prepare("INSERT INTO users (full_name, phone, email, address, login, password_hash) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$data['name'], $data['phone'], $data['email'] ?? '', $data['address'] ?? '', $login, $passwordHash]);
+        $userId = $pdo->lastInsertId();
+        
+        $_SESSION['new_credentials'] = ['login' => $login, 'password' => $password];
     }
     
     // Сохраняем заказ
-    $stmt = $pdo->prepare("
-        INSERT INTO pizza_orders 
-        (user_id, pizza_name, size, quantity, delivery_method, address, 
-         delivery_date, delivery_time, comment, total_price)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
-    
-    $total = (int)str_replace(' ₽', '', $data['total'] ?? '0');
-    
-    $stmt->execute([
-        $user_id,
-        $data['pizza'],
-        $data['size'] ?? 'Средняя',
-        (int)($data['quantity'] ?? 1),
-        $data['delivery_method'] ?? 'Доставка',
-        $data['address'] ?? '',
-        $data['date'] ?? '',
-        $data['time'] ?? '',
-        $data['comment'] ?? '',
-        $total
-    ]);
+    $itemsJson = json_encode($data['items']);
+    $stmt = $pdo->prepare("INSERT INTO orders (user_id, items, total_price, status) VALUES (?, ?, ?, 'new')");
+    $stmt->execute([$userId, $itemsJson, $data['total']]);
+    $orderId = $pdo->lastInsertId();
     
     $pdo->commit();
     
-    $response = ['success' => true, 'order_id' => $pdo->lastInsertId()];
+    $response = ['success' => true, 'order_id' => $orderId];
     if (isset($_SESSION['new_credentials'])) {
         $response['login'] = $_SESSION['new_credentials']['login'];
         $response['password'] = $_SESSION['new_credentials']['password'];
@@ -90,11 +66,10 @@ if ($method === 'POST' && $path === '/orders') {
     exit;
 }
 
-// POST /login - авторизация
-if ($method === 'POST' && $path === '/login') {
+// POST /api.php/login - авторизация
+if ($method === 'POST' && $path === '/api.php/login') {
     $data = json_decode(file_get_contents('php://input'), true);
-    
-    $stmt = $pdo->prepare("SELECT * FROM pizza_users WHERE login = ?");
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE login = ?");
     $stmt->execute([$data['login']]);
     $user = $stmt->fetch();
     
@@ -106,16 +81,6 @@ if ($method === 'POST' && $path === '/login') {
         http_response_code(401);
         echo json_encode(['error' => 'Неверный логин или пароль']);
     }
-    exit;
-}
-
-// GET /orders - получить заказы текущего пользователя
-if ($method === 'GET' && $path === '/orders' && isset($_SESSION['user_id'])) {
-    $stmt = $pdo->prepare("
-        SELECT * FROM pizza_orders WHERE user_id = ? ORDER BY id DESC
-    ");
-    $stmt->execute([$_SESSION['user_id']]);
-    echo json_encode($stmt->fetchAll());
     exit;
 }
 
