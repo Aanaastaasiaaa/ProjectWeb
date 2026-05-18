@@ -143,7 +143,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('orderFromProductBtn')?.addEventListener('click', () => {
         productModal.style.display = 'none';
-        if (!isLoggedIn) { alert('Сначала зарегистрируйтесь и войдите'); registerModal.style.display = 'flex'; return; }
+        if (!isLoggedIn) { 
+            alert('Сначала зарегистрируйтесь и войдите');
+            registerModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            return;
+        }
         openOrderModal();
         addToCart(window.currentProduct.name, window.currentProduct.price);
     });
@@ -155,15 +160,25 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = 'hidden';
     }
 
-    document.querySelectorAll('.order-trigger-main').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (!isLoggedIn) { 
-                registerModal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-                return;
-            }
-            openOrderModal();
+    // Кнопки заказа — только если авторизован
+    function showOrderButtons(show) {
+        const btns = [document.getElementById('orderBtn'), document.getElementById('mobileOrderBtn'), document.getElementById('headerOrderBtn')];
+        btns.forEach(btn => {
+            if (btn) btn.style.display = show ? 'inline-block' : 'none';
         });
+    }
+
+    document.getElementById('orderBtn')?.addEventListener('click', () => {
+        if (!isLoggedIn) { alert('Сначала войдите'); authModal.style.display = 'flex'; return; }
+        openOrderModal();
+    });
+    document.getElementById('mobileOrderBtn')?.addEventListener('click', () => {
+        if (!isLoggedIn) { alert('Сначала войдите'); authModal.style.display = 'flex'; return; }
+        openOrderModal();
+    });
+    document.getElementById('headerOrderBtn')?.addEventListener('click', () => {
+        if (!isLoggedIn) { alert('Сначала войдите'); authModal.style.display = 'flex'; return; }
+        openOrderModal();
     });
 
     // ========== РЕГИСТРАЦИЯ ==========
@@ -217,8 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 isLoggedIn = true;
                 currentUser = data.user;
                 document.getElementById('userDisplay').innerHTML = `👋 ${data.user.full_name}`;
-                document.getElementById('orderBtn').style.display = 'inline-block';
-                document.getElementById('mobileOrderBtn').style.display = 'inline-block';
+                showOrderButtons(true);
                 document.getElementById('loginBtn').style.display = 'none';
                 document.getElementById('mobileLoginBtn').style.display = 'none';
                 authModal.style.display = 'none';
@@ -367,4 +381,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target === authModal) { authModal.style.display = 'none'; document.body.style.overflow = ''; }
         if (e.target === credsModal) { credsModal.style.display = 'none'; document.body.style.overflow = ''; }
     });
+    
+    showOrderButtons(false);
 });
