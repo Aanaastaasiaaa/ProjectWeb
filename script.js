@@ -28,71 +28,17 @@ document.addEventListener('DOMContentLoaded', function() {
         ]
     };
 
-    // ========== КОРЗИНА ==========
+    // ========== СОСТОЯНИЕ ==========
     let cart = [];
+    let isLoggedIn = false;
+    let currentUser = null;
 
-    function addToCart(name, price) {
-        const existing = cart.find(i => i.name === name);
-        if (existing) {
-            existing.qty++;
-        } else {
-            cart.push({ name, price, qty: 1 });
-        }
-        renderCartDisplay();
-    }
-
-    function removeFromCart(index) {
-        cart.splice(index, 1);
-        renderCartDisplay();
-    }
-
-    function renderCartDisplay() {
-        const container = document.getElementById('cartItems');
-        const totalSpan = document.getElementById('orderTotal');
-        if (!container) return;
-
-        if (cart.length === 0) {
-            container.innerHTML = 'Корзина пуста';
-            if (totalSpan) totalSpan.innerText = '0';
-            return;
-        }
-
-        let html = '';
-        let total = 0;
-        cart.forEach((item, idx) => {
-            total += item.price * item.qty;
-            html += `
-                <div class="cart-item">
-                    <span>${item.name} x${item.qty} = ${item.price * item.qty} ₽</span>
-                    <button class="remove-item" data-index="${idx}">Удалить</button>
-                </div>
-            `;
-        });
-        container.innerHTML = html;
-        if (totalSpan) totalSpan.innerText = total;
-
-        document.querySelectorAll('.remove-item').forEach(btn => {
-            btn.addEventListener('click', () => {
-                removeFromCart(parseInt(btn.dataset.index));
-            });
-        });
-    }
-
-    // ========== ГЛАВНОЕ МЕНЮ (карточки с кнопкой "Подробнее") ==========
-    function renderMainMenu() {
-        const container = document.getElementById('menuGrid');
+    // ========== РЕНДЕР КАРТОЧЕК ==========
+    function renderCategory(category, containerId) {
+        const container = document.getElementById(containerId);
         if (!container) return;
         container.innerHTML = '';
-
-        const allItems = [
-            ...menuData.pizza.map(i => ({ ...i, cat: 'pizza' })),
-            ...menuData.pasta.map(i => ({ ...i, cat: 'pasta' })),
-            ...menuData.salads.map(i => ({ ...i, cat: 'salads' })),
-            ...menuData.drinks.map(i => ({ ...i, cat: 'drinks' })),
-            ...menuData.desserts.map(i => ({ ...i, cat: 'desserts' }))
-        ];
-
-        allItems.forEach(item => {
+        menuData[category].forEach(item => {
             const card = document.createElement('div');
             card.className = 'menu-item';
             card.innerHTML = `
@@ -106,26 +52,52 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             container.appendChild(card);
         });
+    }
 
-        document.querySelectorAll('.view-product-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.getElementById('productImage').src = btn.dataset.img;
-                document.getElementById('productName').innerText = btn.dataset.name;
-                document.getElementById('productDesc').innerText = btn.dataset.desc;
-                document.getElementById('productPrice').innerHTML = btn.dataset.price + ' ₽';
-                window.currentProduct = { name: btn.dataset.name, price: parseInt(btn.dataset.price) };
-                document.getElementById('productModal').style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            });
+    renderCategory('pizza', 'pizzaGrid');
+    renderCategory('pasta', 'pastaGrid');
+    renderCategory('salads', 'saladsGrid');
+    renderCategory('drinks', 'drinksGrid');
+    renderCategory('desserts', 'dessertsGrid');
+
+    // ========== КОРЗИНА ==========
+    function addToCart(name, price) {
+        const existing = cart.find(i => i.name === name);
+        if (existing) existing.qty++;
+        else cart.push({ name, price, qty: 1 });
+        renderCartDisplay();
+    }
+
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        renderCartDisplay();
+    }
+
+    function renderCartDisplay() {
+        const container = document.getElementById('cartItems');
+        const totalSpan = document.getElementById('orderTotal');
+        if (!container) return;
+        if (cart.length === 0) {
+            container.innerHTML = 'Корзина пуста';
+            if (totalSpan) totalSpan.innerText = '0';
+            return;
+        }
+        let html = '', total = 0;
+        cart.forEach((item, idx) => {
+            total += item.price * item.qty;
+            html += `<div class="cart-item"><span>${item.name} x${item.qty} = ${item.price * item.qty} ₽</span><button class="remove-item" data-index="${idx}">Удалить</button></div>`;
+        });
+        container.innerHTML = html;
+        if (totalSpan) totalSpan.innerText = total;
+        document.querySelectorAll('.remove-item').forEach(btn => {
+            btn.addEventListener('click', () => removeFromCart(parseInt(btn.dataset.index)));
         });
     }
 
-    // ========== МЕНЮ ВНУТРИ АНКЕТЫ (выбор позиций) ==========
     function renderModalMenu() {
         const container = document.getElementById('modalMenuList');
         if (!container) return;
         container.innerHTML = '';
-
         const allItems = [
             ...menuData.pizza.map(i => ({ name: i.name, price: i.price })),
             ...menuData.pasta.map(i => ({ name: i.name, price: i.price })),
@@ -133,29 +105,46 @@ document.addEventListener('DOMContentLoaded', function() {
             ...menuData.drinks.map(i => ({ name: i.name, price: i.price })),
             ...menuData.desserts.map(i => ({ name: i.name, price: i.price }))
         ];
-
         allItems.forEach(item => {
             const row = document.createElement('div');
             row.className = 'menu-item-row';
-            row.innerHTML = `
-                <span>${item.name} - ${item.price} ₽</span>
-                <button class="add-to-cart-btn" data-name="${item.name}" data-price="${item.price}">+</button>
-            `;
+            row.innerHTML = `<span>${item.name} - ${item.price} ₽</span><button class="add-to-cart-btn" data-name="${item.name}" data-price="${item.price}">+</button>`;
             container.appendChild(row);
         });
-
         document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                addToCart(btn.dataset.name, parseInt(btn.dataset.price));
-            });
+            btn.addEventListener('click', () => addToCart(btn.dataset.name, parseInt(btn.dataset.price)));
         });
     }
 
     // ========== МОДАЛЬНЫЕ ОКНА ==========
-    const orderModal = document.getElementById('orderModal');
-    const closeOrderModal = document.getElementById('closeOrderModal');
     const productModal = document.getElementById('productModal');
-    const closeProductModal = document.getElementById('closeProductModal');
+    const orderModal = document.getElementById('orderModal');
+    const authModal = document.getElementById('authModal');
+    const credsModal = document.getElementById('credsModal');
+
+    document.querySelectorAll('.view-product-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('productImage').src = btn.dataset.img;
+            document.getElementById('productName').innerText = btn.dataset.name;
+            document.getElementById('productDesc').innerText = btn.dataset.desc;
+            document.getElementById('productPrice').innerHTML = btn.dataset.price + ' ₽';
+            window.currentProduct = { name: btn.dataset.name, price: parseInt(btn.dataset.price) };
+            productModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    document.getElementById('closeProductModal')?.addEventListener('click', () => {
+        productModal.style.display = 'none';
+        document.body.style.overflow = '';
+    });
+
+    document.getElementById('orderFromProductBtn')?.addEventListener('click', () => {
+        productModal.style.display = 'none';
+        if (!isLoggedIn) { alert('Пожалуйста, войдите'); authModal.style.display = 'flex'; return; }
+        openOrderModal();
+        addToCart(window.currentProduct.name, window.currentProduct.price);
+    });
 
     function openOrderModal() {
         renderModalMenu();
@@ -165,50 +154,103 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.querySelectorAll('.order-trigger-main').forEach(btn => {
-        btn.addEventListener('click', () => openOrderModal());
+        btn.addEventListener('click', () => {
+            if (!isLoggedIn) { alert('Пожалуйста, войдите'); authModal.style.display = 'flex'; return; }
+            openOrderModal();
+        });
     });
 
-    closeOrderModal?.addEventListener('click', () => {
+    document.getElementById('closeOrderModal')?.addEventListener('click', () => {
         orderModal.style.display = 'none';
         document.body.style.overflow = '';
     });
 
-    closeProductModal?.addEventListener('click', () => {
-        productModal.style.display = 'none';
+    // ========== АВТОРИЗАЦИЯ ==========
+    document.getElementById('loginBtn').addEventListener('click', () => {
+        authModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    });
+    document.getElementById('mobileLoginBtn').addEventListener('click', () => {
+        authModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    });
+    document.getElementById('closeAuthModal')?.addEventListener('click', () => {
+        authModal.style.display = 'none';
         document.body.style.overflow = '';
     });
 
-    document.getElementById('orderFromProductBtn')?.addEventListener('click', () => {
-        productModal.style.display = 'none';
-        openOrderModal();
-        if (window.currentProduct) {
-            addToCart(window.currentProduct.name, window.currentProduct.price);
+    document.getElementById('authForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const login = document.getElementById('authLogin').value;
+        const password = document.getElementById('authPassword').value;
+        try {
+            const res = await fetch('/api.php/login', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login, password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                isLoggedIn = true;
+                currentUser = data.user;
+                document.getElementById('userDisplay').innerHTML = `👋 ${data.user.full_name}`;
+                document.getElementById('orderBtn').style.display = 'inline-block';
+                document.getElementById('mobileOrderBtn').style.display = 'inline-block';
+                document.getElementById('headerOrderBtn').style.display = 'inline-block';
+                document.getElementById('loginBtn').style.display = 'none';
+                document.getElementById('mobileLoginBtn').style.display = 'none';
+                authModal.style.display = 'none';
+                document.body.style.overflow = '';
+                alert('Добро пожаловать!');
+            } else {
+                document.getElementById('authMessage').innerHTML = `<div class="error">${data.error}</div>`;
+            }
+        } catch(err) {
+            alert('Ошибка соединения');
         }
     });
 
-    // Отправка заказа
-    document.getElementById('orderModalForm')?.addEventListener('submit', (e) => {
+    // ========== ОФОРМЛЕНИЕ ЗАКАЗА ==========
+    document.getElementById('orderModalForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('orderName').value;
         const phone = document.getElementById('orderPhone').value;
+        const email = document.getElementById('orderEmail').value;
+        const address = document.getElementById('orderAddress').value;
 
-        if (!name || !phone) {
-            alert('Заполните имя и телефон');
-            return;
+        if (!name || !phone) { alert('Заполните имя и телефон'); return; }
+        if (cart.length === 0) { alert('Добавьте позиции'); return; }
+
+        const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+        const res = await fetch('/api.php/orders', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, phone, email, address, items: cart, total })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            alert(`Заказ оформлен! Сумма: ${total} ₽`);
+            if (data.login && data.password) {
+                document.getElementById('credsLogin').innerText = data.login;
+                document.getElementById('credsPassword').innerText = data.password;
+                credsModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+            cart = []; renderCartDisplay();
+            orderModal.style.display = 'none';
+            document.body.style.overflow = '';
+        } else {
+            alert('Ошибка: ' + (data.error || 'Неизвестно'));
         }
-        if (cart.length === 0) {
-            alert('Добавьте хотя бы одну позицию');
-            return;
-        }
+    });
 
-        const totalSpan = document.getElementById('orderTotal');
-        alert(`✅ Заказ оформлен!\n\nКлиент: ${name}\nТелефон: ${phone}\n\n${cart.map(i => `${i.name} x${i.qty} = ${i.price * i.qty}₽`).join('\n')}\n\nИТОГО: ${totalSpan.innerText} ₽`);
-
-        cart = [];
-        renderCartDisplay();
-        orderModal.style.display = 'none';
+    document.getElementById('closeCredsModal')?.addEventListener('click', () => {
+        credsModal.style.display = 'none';
         document.body.style.overflow = '';
-        document.getElementById('orderModalForm').reset();
+    });
+    document.getElementById('copyCredsBtn')?.addEventListener('click', () => {
+        const login = document.getElementById('credsLogin').innerText;
+        const pass = document.getElementById('credsPassword').innerText;
+        navigator.clipboard.writeText(`Логин: ${login}\nПароль: ${pass}`);
+        alert('Скопировано!');
     });
 
     // ========== СЛАЙДЕР ==========
@@ -217,31 +259,25 @@ document.addEventListener('DOMContentLoaded', function() {
         { image: "ing.jpg", caption: "Свежие ингредиенты высшего качества" },
         { image: "kor.webp", caption: "Идеальная хрустящая корочка" }
     ];
-
     const sliderTrack = document.getElementById('sliderTrack');
     const sliderDots = document.getElementById('sliderDots');
     let currentSlide = 0;
-
     if (sliderTrack && sliderDots) {
-        slides.forEach((slide, index) => {
-            const slideDiv = document.createElement('div');
-            slideDiv.className = 'slide';
-            slideDiv.innerHTML = `<img src="${slide.image}"><h3>${slide.caption}</h3>`;
-            sliderTrack.appendChild(slideDiv);
+        slides.forEach((s, i) => {
+            const div = document.createElement('div');
+            div.className = 'slide';
+            div.innerHTML = `<img src="${s.image}"><h3>${s.caption}</h3>`;
+            sliderTrack.appendChild(div);
             const dot = document.createElement('div');
-            dot.className = index === 0 ? 'slider-dot active' : 'slider-dot';
-            dot.addEventListener('click', () => goToSlide(index));
+            dot.className = i === 0 ? 'slider-dot active' : 'slider-dot';
+            dot.addEventListener('click', () => goToSlide(i));
             sliderDots.appendChild(dot);
         });
-
-        function goToSlide(index) {
-            currentSlide = index;
+        function goToSlide(i) {
+            currentSlide = i;
             sliderTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
-            document.querySelectorAll('.slider-dot').forEach((dot, i) => {
-                dot.classList.toggle('active', i === currentSlide);
-            });
+            document.querySelectorAll('.slider-dot').forEach((d, idx) => d.classList.toggle('active', idx === currentSlide));
         }
-
         document.getElementById('sliderPrev')?.addEventListener('click', () => {
             currentSlide = (currentSlide - 1 + slides.length) % slides.length;
             goToSlide(currentSlide);
@@ -253,36 +289,25 @@ document.addEventListener('DOMContentLoaded', function() {
         goToSlide(0);
     }
 
-    // ========== МОБИЛЬНОЕ МЕНЮ ==========
-    document.querySelectorAll('.mobile-dropdown-trigger').forEach(trigger => {
-        trigger.addEventListener('click', function(e) {
+    document.querySelectorAll('.mobile-dropdown-trigger').forEach(tr => {
+        tr.addEventListener('click', e => {
             e.preventDefault();
-            this.nextElementSibling?.classList.toggle('active');
+            tr.nextElementSibling?.classList.toggle('active');
         });
     });
-
-    // ========== ПЛАВНАЯ ПРОКРУТКА ==========
     document.querySelectorAll('.dropdown-menu a, .mobile-dropdown a').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
-            if (href && href.startsWith('#')) {
+            if (href?.startsWith('#')) {
                 e.preventDefault();
-                document.querySelector(href)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
             }
         });
     });
-
-    // ========== ЗАКРЫТИЕ МОДАЛОК ПО КЛИКУ ВНЕ ==========
     window.addEventListener('click', (e) => {
-        if (e.target === productModal) {
-            productModal.style.display = 'none';
-            document.body.style.overflow = '';
-        }
-        if (e.target === orderModal) {
-            orderModal.style.display = 'none';
-            document.body.style.overflow = '';
-        }
+        if (e.target === productModal) { productModal.style.display = 'none'; document.body.style.overflow = ''; }
+        if (e.target === orderModal) { orderModal.style.display = 'none'; document.body.style.overflow = ''; }
+        if (e.target === authModal) { authModal.style.display = 'none'; document.body.style.overflow = ''; }
+        if (e.target === credsModal) { credsModal.style.display = 'none'; document.body.style.overflow = ''; }
     });
-
-    renderMainMenu();
 });
