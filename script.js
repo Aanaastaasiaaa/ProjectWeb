@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ]
     };
 
-    // РЕНДЕР КАТЕГОРИЙ
+    // РЕНДЕР МЕНЮ
     function renderCategory(cat, containerId) {
         const container = document.getElementById(containerId);
         if (!container) return;
@@ -52,6 +52,74 @@ document.addEventListener('DOMContentLoaded', function() {
     renderCategory('drinks', 'drinksGrid');
     renderCategory('desserts', 'dessertsGrid');
 
+    // ========== КОРЗИНА (ГЛОБАЛЬНОЕ СОСТОЯНИЕ) ==========
+    let cart = [];
+
+    function saveCart() {
+        localStorage.setItem('pizzaCart', JSON.stringify(cart));
+    }
+
+    function loadCart() {
+        const saved = localStorage.getItem('pizzaCart');
+        if (saved) cart = JSON.parse(saved);
+        renderCart();
+    }
+
+    function renderCart() {
+        const container = document.getElementById('cartItems');
+        const totalSpan = document.getElementById('orderTotal');
+        if (!container) return;
+
+        if (cart.length === 0) {
+            container.innerHTML = '<div class="cart-empty">Корзина пуста</div>';
+            if (totalSpan) totalSpan.innerText = '0 ₽';
+            return;
+        }
+
+        let html = '';
+        let total = 0;
+
+        cart.forEach((item, idx) => {
+            const itemTotal = item.price * item.qty;
+            total += itemTotal;
+            html += `
+                <div class="cart-item">
+                    <div class="cart-item-info">
+                        <strong>${item.name}</strong>
+                        <span>${item.price} ₽ × ${item.qty} = ${itemTotal} ₽</span>
+                    </div>
+                    <button type="button" class="remove-item-btn" data-index="${idx}">✖</button>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+        if (totalSpan) totalSpan.innerText = total + ' ₽';
+
+        // Назначаем обработчики удаления
+        document.querySelectorAll('.remove-item-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.index);
+                cart.splice(idx, 1);
+                renderCart();
+                saveCart();
+            });
+        });
+    }
+
+    function addToCart(name, price, qty) {
+        cart.push({ name: name, price: parseInt(price), qty: parseInt(qty) });
+        renderCart();
+        saveCart();
+    }
+
+    // ОЧИСТКА КОРЗИНЫ ПРИ УСПЕШНОМ ЗАКАЗЕ
+    function clearCart() {
+        cart = [];
+        renderCart();
+        saveCart();
+    }
+
     // МОДАЛКА ТОВАРА
     const productModal = document.getElementById('productModal');
     const closeProductModal = document.getElementById('closeProductModal');
@@ -73,45 +141,27 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = '';
     });
 
-    // МОДАЛКА ЗАКАЗА
+    // ОТКРЫТИЕ ФОРМЫ ЗАКАЗА
     const orderModal = document.getElementById('orderModal');
     const closeOrderModal = document.getElementById('closeOrderModal');
-    const orderProduct = document.getElementById('orderProduct');
-    const orderQuantity = document.getElementById('orderQuantity');
-    const orderTotal = document.getElementById('orderTotal');
 
-    function updateTotal() {
-        const val = orderProduct.value;
-        if (!val) { orderTotal.innerText = '0 ₽'; return; }
-        const price = parseInt(val.split('|')[1]) || 0;
-        const qty = parseInt(orderQuantity.value) || 1;
-        orderTotal.innerText = (price * qty) + ' ₽';
-    }
-
-    orderProduct.addEventListener('change', updateTotal);
-    orderQuantity.addEventListener('change', updateTotal);
-
-    function openOrderModal(product = null) {
-        if (product) {
-            for (let opt of orderProduct.options) {
-                if (opt.value.startsWith(product.name + '|')) {
-                    opt.selected = true;
-                    break;
-                }
-            }
-            updateTotal();
-        }
+    function openOrderModal() {
+        loadCart();
         orderModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
 
-    document.getElementById('orderFromProductBtn').addEventListener('click', () => {
-        productModal.style.display = 'none';
-        openOrderModal(window.currentProduct);
-    });
-
     document.querySelectorAll('.order-trigger-main').forEach(btn => {
         btn.addEventListener('click', () => openOrderModal());
+    });
+
+    document.getElementById('orderFromProductBtn')?.addEventListener('click', () => {
+        productModal.style.display = 'none';
+        openOrderModal();
+        // Добавляем товар из карточки в корзину
+        if (window.currentProduct) {
+            addToCart(window.currentProduct.name, window.currentProduct.price, 1);
+        }
     });
 
     closeOrderModal.addEventListener('click', () => {
@@ -119,15 +169,47 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = '';
     });
 
-    document.getElementById('orderModalForm').addEventListener('submit', (e) => {
+    // ДОБАВЛЕНИЕ ПОЗИЦИИ ИЗ ФОРМЫ
+    document.getElementById('addItemBtn')?.addEventListener('click', () => {
+        const select = document.getElementById('orderProductSelect');
+        const qtyInput = document.getElementById('orderProductQty');
+        const selected = select.value;
+        if (!selected) {
+            alert('Выберите позицию');
+            return;
+        }
+        const [name, price] = selected.split('|');
+        const qty = parseInt(qtyInput.value) || 1;
+        addToCart(name, price, qty);
+        select.value = '';
+        qtyInput.value = '1';
+    });
+
+    // ОФОРМЛЕНИЕ ЗАКАЗА
+    document.getElementById('orderModalForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const name = document.getElementById('orderName').value;
         const phone = document.getElementById('orderPhone').value;
-        if (!name || !phone || !orderProduct.value) {
-            alert('Заполните имя, телефон и выберите позицию');
+        const address = document.getElementById('orderAddress').value;
+
+        if (!name || !phone) {
+            alert('Заполните имя и телефон');
             return;
         }
-        alert(`Заказ отправлен!\nСумма: ${orderTotal.innerText}`);
+        if (cart.length === 0) {
+            alert('Добавьте хотя бы одну позицию в заказ');
+            return;
+        }
+
+        const total = document.getElementById('orderTotal').innerText;
+        alert(`✅ Заказ оформлен!\n\nКлиент: ${name}\nТелефон: ${phone}\nАдрес: ${address || 'Не указан'}\nСумма: ${total}\n\nСпасибо за заказ!`);
+        
+        clearCart();
+        document.getElementById('orderName').value = '';
+        document.getElementById('orderPhone').value = '';
+        document.getElementById('orderEmail').value = '';
+        document.getElementById('orderAddress').value = '';
+
         orderModal.style.display = 'none';
         document.body.style.overflow = '';
     });
