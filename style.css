@@ -470,3 +470,68 @@ body {
     .header h1 { font-size: 2rem; }
     .form-row { flex-direction: column; }
 }
+/* Корзина */
+.cart-section {
+    margin: 20px 0;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.cart-section label {
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.cart-items {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 10px;
+    min-height: 100px;
+}
+
+.cart-empty {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    background: white;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.cart-item-info {
+    flex: 1;
+}
+
+.cart-item-info strong {
+    display: block;
+    font-size: 1rem;
+}
+
+.cart-item-info span {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.remove-item-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.remove-item-btn:hover {
+    background: #c82333;
+}
