@@ -1,207 +1,78 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PizzaMania - Лучшая пицца в городе</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<nav class="navbar">
-    <div class="container nav-container">
-        <a href="#" class="logo">Pizza<span>Mania</span></a>
-
-        <!-- Десктопное меню -->
-        <ul class="nav-menu desktop-menu">
-            <li class="nav-item"><a href="#home" class="nav-link">Главная</a></li>
-            <li class="nav-item dropdown">
-                <a href="#menu" class="nav-link">Меню ▼</a>
-                <ul class="dropdown-menu">
-                    <li><a href="#pizza">🍕 Пицца</a></li>
-                    <li><a href="#pasta">🍝 Паста</a></li>
-                    <li><a href="#salads">🥗 Салаты</a></li>
-                    <li><a href="#drinks">🥤 Напитки</a></li>
-                    <li><a href="#desserts">🍰 Десерты</a></li>
-                </ul>
-            </li>
-            <li class="nav-item"><a href="#about" class="nav-link">О нас</a></li>
-            <li class="nav-item"><a href="#gallery" class="nav-link">Галерея</a></li>
-            <li class="nav-item"><button class="btn order-trigger-main">Связаться с нами</button></li>
-        </ul>
-
-        <!-- Мобильное меню -->
-        <ul class="mobile-nav">
-            <li><a href="#home" class="mobile-nav-link">Главная</a></li>
-            <li class="mobile-menu-item">
-                <a href="#menu" class="mobile-nav-link mobile-dropdown-trigger">Меню</a>
-                <ul class="mobile-dropdown">
-                    <li><a href="#pizza">🍕 Пицца</a></li>
-                    <li><a href="#pasta">🍝 Паста</a></li>
-                    <li><a href="#salads">🥗 Салаты</a></li>
-                    <li><a href="#drinks">🥤 Напитки</a></li>
-                    <li><a href="#desserts">🍰 Десерты</a></li>
-                </ul>
-            </li>
-            <li><a href="#about" class="mobile-nav-link">О нас</a></li>
-            <li><a href="#gallery" class="mobile-nav-link">Галерея</a></li>
-            <li><button class="btn order-trigger-main mobile-order-btn">Связаться с нами</button></li>
-        </ul>
-    </div>
-</nav>
-
-<!-- Шапка -->
-<header class="header" id="home">
-    <video autoplay muted loop class="header-video">
-        <source src="vid.mp4" type="video/mp4">
-    </video>
-    <div class="header-overlay"></div>
-    <div class="header-content">
-        <h1>Лучшая пицца в городе</h1>
-        <p>Настоящая итальянская пицца с дровяной печи</p>
-        <button class="btn order-trigger-main">Заказать сейчас</button>
-    </div>
-</header>
-
-<!-- МЕНЮ -->
-<section class="section" id="menu">
-    <div class="container">
-        <h2 class="section-title">Наше меню</h2>
-
-        <div id="pizza" class="menu-category">
-            <h3 class="category-title">🍕 Пицца</h3>
-            <div class="menu-grid" id="pizzaGrid"></div>
-        </div>
-
-        <div id="pasta" class="menu-category">
-            <h3 class="category-title">🍝 Паста</h3>
-            <div class="menu-grid" id="pastaGrid"></div>
-        </div>
-
-        <div id="salads" class="menu-category">
-            <h3 class="category-title">🥗 Салаты</h3>
-            <div class="menu-grid" id="saladsGrid"></div>
-        </div>
-
-        <div id="drinks" class="menu-category">
-            <h3 class="category-title">🥤 Напитки</h3>
-            <div class="menu-grid" id="drinksGrid"></div>
-        </div>
-
-        <div id="desserts" class="menu-category">
-            <h3 class="category-title">🍰 Десерты</h3>
-            <div class="menu-grid" id="dessertsGrid"></div>
-        </div>
-    </div>
-</section>
-
-<!-- О НАС -->
-<section class="section" id="about">
-    <div class="container">
-        <h2 class="section-title">О нашей пиццерии</h2>
-        <div class="about-content">
-            <div class="about-text">
-                <p>Мы - семейная пиццерия с более чем 20-летним опытом приготовления настоящей итальянской пиццы.</p>
-                <p>Используем только свежие ингредиенты: настоящий сыр моцарелла, помидоры Сан-Марцано, свежий базилик.</p>
-                <p>Наша печь на дровах разогревается до 400°C, что позволяет приготовить пиццу всего за 90 секунд.</p>
-                <p>Доставляем заказы в течение 30 минут или пицца бесплатно!</p>
-            </div>
-            <div class="about-image">
-                <img src="pech.webp" alt="Пицца в печи">
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ГАЛЕРЕЯ (СЛАЙДЕР) -->
-<section class="section" id="gallery">
-    <div class="container">
-        <h2 class="section-title">Наша галерея</h2>
-        <div class="slider" id="slider">
-            <div class="slider-track" id="sliderTrack"></div>
-            <button class="slider-nav slider-prev" id="sliderPrev">‹</button>
-            <button class="slider-nav slider-next" id="sliderNext">›</button>
-            <div class="slider-dots" id="sliderDots"></div>
-        </div>
-    </div>
-</section>
-
-<!-- ФУТЕР -->
-<footer class="footer">
-    <div class="container">
-        <p>Ежедневно с 10:00 до 23:00</p>
-        <p>Телефон: +7 (999) 999-99-99</p>
-        <p class="copyright">© 2025 PizzaMania</p>
-    </div>
-</footer>
-
-<!-- ========== МОДАЛЬНОЕ ОКНО ТОВАРА ========== -->
-<div id="productModal" class="modal">
-    <div class="modal-content product-modal">
-        <button id="closeProductModal" class="modal-close">×</button>
-        <img id="productImage" src="" alt="">
-        <h3 id="productName"></h3>
-        <div class="product-description" id="productDesc"></div>
-        <div class="product-price" id="productPrice"></div>
-        <button id="orderFromProductBtn" class="btn">Заказать</button>
-    </div>
-</div>
-
-<!-- ========== МОДАЛЬНОЕ ОКНО ЗАКАЗА ========== -->
+<!-- ========== МОДАЛЬНОЕ ОКНО ЗАКАЗА (обновлённое) ========== -->
 <div id="orderModal" class="modal">
     <div class="modal-content">
         <button id="closeOrderModal" class="modal-close">×</button>
         <h2>Оформление заказа</h2>
+
         <form id="orderModalForm">
             <div class="form-group">
                 <label>Ваше имя *</label>
                 <input type="text" id="orderName" name="name" class="form-control" required>
             </div>
+
             <div class="form-group">
                 <label>Телефон *</label>
                 <input type="tel" id="orderPhone" name="phone" class="form-control" required>
             </div>
+
             <div class="form-group">
                 <label>Email</label>
                 <input type="email" id="orderEmail" name="email" class="form-control">
             </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Выберите позицию *</label>
+                    <select id="orderProduct" name="product" class="form-control" required>
+                        <option value="">-- Выберите --</option>
+                        <optgroup label="🍕 Пицца">
+                            <option value="Маргарита|450">Маргарита - 450 ₽</option>
+                            <option value="Пепперони|550">Пепперони - 550 ₽</option>
+                            <option value="Четыре сыра|600">Четыре сыра - 600 ₽</option>
+                        </optgroup>
+                        <optgroup label="🍝 Паста">
+                            <option value="Карбонара|420">Карбонара - 420 ₽</option>
+                            <option value="Болоньезе|450">Болоньезе - 450 ₽</option>
+                        </optgroup>
+                        <optgroup label="🥗 Салаты">
+                            <option value="Цезарь|350">Цезарь - 350 ₽</option>
+                            <option value="Греческий|320">Греческий - 320 ₽</option>
+                        </optgroup>
+                        <optgroup label="🥤 Напитки">
+                            <option value="Coca-Cola|120">Coca-Cola - 120 ₽</option>
+                            <option value="Лимонад|150">Лимонад - 150 ₽</option>
+                        </optgroup>
+                        <optgroup label="🍰 Десерты">
+                            <option value="Тирамису|280">Тирамису - 280 ₽</option>
+                            <option value="Чизкейк|250">Чизкейк - 250 ₽</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Количество</label>
+                    <select id="orderQuantity" class="form-control">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label>Адрес доставки</label>
                 <textarea id="orderAddress" name="address" class="form-control" rows="2"></textarea>
             </div>
+
             <div class="order-summary">
-                <h3>Сумма: <span id="orderTotal">0 ₽</span></h3>
+                <h3>Сумма заказа: <span id="orderTotal">0 ₽</span></h3>
             </div>
-            <button type="submit" class="btn" style="width:100%">Оформить</button>
+
+            <div id="orderMessageContainer"></div>
+
+            <button type="submit" class="btn" style="width:100%">Оформить заказ</button>
         </form>
     </div>
 </div>
-
-<!-- ========== МОДАЛЬНОЕ ОКНО АВТОРИЗАЦИИ ========== -->
-<div id="authModal" class="modal">
-    <div class="modal-content" style="max-width: 400px;">
-        <button id="closeAuthModal" class="modal-close">×</button>
-        <h2>Вход</h2>
-        <form id="authForm">
-            <input type="text" id="authLogin" placeholder="Логин" class="form-control" required>
-            <input type="password" id="authPassword" placeholder="Пароль" class="form-control" required>
-            <div id="authMessage"></div>
-            <button type="submit" class="btn" style="width:100%">Войти</button>
-        </form>
-    </div>
-</div>
-
-<!-- ========== МОДАЛЬНОЕ ОКНО С ЛОГИНОМ/ПАРОЛЕМ ========== -->
-<div id="credentialsModal" class="modal">
-    <div class="modal-content" style="max-width: 400px;">
-        <button id="closeCredsModal" class="modal-close">×</button>
-        <h2>Регистрация</h2>
-        <div id="credentialsContent"></div>
-        <button id="copyCredentialsBtn" class="btn">Скопировать</button>
-    </div>
-</div>
-
-<script src="script.js"></script>
-</body>
-</html>
