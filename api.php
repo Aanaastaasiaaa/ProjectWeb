@@ -1,74 +1,83 @@
 <?php
 header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
+}
 
 session_start();
 
-// Подключение к БД (как в задании 5)
+// ========== ПОДКЛЮЧЕНИЕ К БД ==========
 $host = 'localhost';
-$dbname = 'u82277';
-$user = 'u82277';
-$pass = '1452026';
+$dbname = 'u82277';      // ЗАМЕНИ НА СВОЮ БД
+$username = 'u82277';     // ЗАМЕНИ НА СВОЙ ЛОГИН
+$password = '1452026';    // ЗАМЕНИ НА СВОЙ ПАРОЛЬ
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch(PDOException $e) {
-    die(json_encode(['error' => 'DB connection failed']));
+    echo json_encode(['error' => 'Ошибка подключения к базе данных']);
+    exit;
 }
 
+// ========== ФУНКЦИИ ==========
+function generateCredentials() {
+    return [
+        'login' => 'user_' . bin2hex(random_bytes(4)),
+        'password' => bin2hex(random_bytes(8))
+    ];
+}
+
+// ========== ОБРАБОТЧИКИ ==========
 $method = $_SERVER['REQUEST_METHOD'];
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// POST /api.php/orders - создание заказа
-if ($method === 'POST' && $path === '/api.php/orders') {
+// РЕГИСТРАЦИЯ
+if ($method === 'POST' && strpos($path, '/register') !== false) {
     $data = json_decode(file_get_contents('php://input'), true);
     
-    // Простейшая валидация
     if (empty($data['name']) || empty($data['phone'])) {
         echo json_encode(['error' => 'Имя и телефон обязательны']);
         exit;
     }
     
-    $pdo->beginTransaction();
+    $creds = generateCredentials();
+    $login = $creds['login'];
+    $passwordHash = password_hash($creds['password'], PASSWORD_DEFAULT);
     
-    // Проверяем, есть ли пользователь в сессии (авторизован)
-    if (isset($_SESSION['user_id'])) {
-        $userId = $_SESSION['user_id'];
-    } else {
-        // Генерация логина и пароля (как в задании 5)
-        $login = 'user_' . bin2hex(random_bytes(4));
-        $password = bin2hex(random_bytes(8));
-        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO users (full_name, phone, email, address, login, password_hash) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([
+            $data['name'],
+            $data['phone'],
+            $data['email'] ?? '',
+            $data['address'] ?? '',
+            $login,
+            $passwordHash
+        ]);
         
-        $stmt = $pdo->prepare("INSERT INTO users (full_name, phone, email, address, login, password_hash) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$data['name'], $data['phone'], $data['email'] ?? '', $data['address'] ?? '', $login, $passwordHash]);
-        $userId = $pdo->lastInsertId();
-        
-        $_SESSION['new_credentials'] = ['login' => $login, 'password' => $password];
+        echo json_encode([
+            'success' => true,
+            'login' => $login,
+            'password' => $creds['password']
+        ]);
+    } catch(PDOException $e) {
+        echo json_encode(['error' => 'Пользователь с таким телефоном уже существует']);
     }
-    
-    // Сохраняем заказ
-    $itemsJson = json_encode($data['items']);
-    $stmt = $pdo->prepare("INSERT INTO orders (user_id, items, total_price, status) VALUES (?, ?, ?, 'new')");
-    $stmt->execute([$userId, $itemsJson, $data['total']]);
-    $orderId = $pdo->lastInsertId();
-    
-    $pdo->commit();
-    
-    $response = ['success' => true, 'order_id' => $orderId];
-    if (isset($_SESSION['new_credentials'])) {
-        $response['login'] = $_SESSION['new_credentials']['login'];
-        $response['password'] = $_SESSION['new_credentials']['password'];
-        unset($_SESSION['new_credentials']);
-    }
-    
-    echo json_encode($response);
     exit;
 }
 
-// POST /api.php/login - авторизация
-if ($method === 'POST' && $path === '/api.php/login') {
+// ВХОД
+if ($method === 'POST' && strpos($path, '/login') !== false) {
     $data = json_decode(file_get_contents('php://input'), true);
+    
     $stmt = $pdo->prepare("SELECT * FROM users WHERE login = ?");
     $stmt->execute([$data['login']]);
     $user = $stmt->fetch();
@@ -76,13 +85,47 @@ if ($method === 'POST' && $path === '/api.php/login') {
     if ($user && password_verify($data['password'], $user['password_hash'])) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['full_name'];
-        echo json_encode(['success' => true, 'user' => $user]);
+        echo json_encode([
+            'success' => true,
+            'user' => [
+                'id' => $user['id'],
+                'full_name' => $user['full_name'],
+                'phone' => $user['phone'],
+                'email' => $user['email'],
+                'address' => $user['address']
+            ]
+        ]);
     } else {
-        http_response_code(401);
         echo json_encode(['error' => 'Неверный логин или пароль']);
     }
     exit;
 }
 
-http_response_code(404);
-echo json_encode(['error' => 'Not found']);
+// ЗАКАЗ (только для авторизованных)
+if ($method === 'POST' && strpos($path, '/orders') !== false) {
+    if (!isset($_SESSION['user_id'])) {
+        echo json_encode(['error' => 'Не авторизован']);
+        exit;
+    }
+    
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    if (empty($data['name']) || empty($data['phone'])) {
+        echo json_encode(['error' => 'Имя и телефон обязательны']);
+        exit;
+    }
+    
+    $itemsJson = json_encode($data['items'] ?? []);
+    $total = $data['total'] ?? 0;
+    
+    $stmt = $pdo->prepare("
+        INSERT INTO orders (user_id, items, total_price, status) 
+        VALUES (?, ?, ?, 'new')
+    ");
+    $stmt->execute([$_SESSION['user_id'], $itemsJson, $total]);
+    
+    echo json_encode(['success' => true, 'order_id' => $pdo->lastInsertId()]);
+    exit;
+}
+
+echo json_encode(['error' => 'Неизвестный запрос']);
