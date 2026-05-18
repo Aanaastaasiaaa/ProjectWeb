@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    // ========== ДАННЫЕ МЕНЮ ==========
+    // ========== ДАННЫЕ МЕНЮ (ПОЛНЫЙ КАТАЛОГ) ==========
     const menuData = {
         pizza: [
             { name: "Маргарита", desc: "Томатный соус, моцарелла, базилик", price: 450, image: "margarita.webp" },
@@ -8,20 +8,24 @@ document.addEventListener('DOMContentLoaded', function() {
             { name: "Четыре сыра", desc: "Моцарелла, горгонзола, пармезан, фета", price: 600, image: "4cheese.jfif" }
         ],
         pasta: [
-            { name: "Карбонара", desc: "Спагетти, бекон, сливочный соус", price: 420, image: "carbonara.jpg" }
+            { name: "Карбонара", desc: "Спагетти, бекон, сливочный соус", price: 420, image: "carbonara.jpg" },
+            { name: "Болоньезе", desc: "Спагетти, мясной соус", price: 450, image: "bolognese.jpg" }
         ],
         salads: [
-            { name: "Цезарь", desc: "Курица, пармезан, соус Цезарь", price: 350, image: "caesar.jpg" }
+            { name: "Цезарь", desc: "Курица, пармезан, соус Цезарь", price: 350, image: "caesar.jpg" },
+            { name: "Греческий", desc: "Овощи, фета, оливки", price: 320, image: "greek.jpg" }
         ],
         drinks: [
-            { name: "Coca-Cola", desc: "0.5 л", price: 120, image: "coca.jpg" }
+            { name: "Coca-Cola", desc: "0.5 л", price: 120, image: "coca.jpg" },
+            { name: "Лимонад", desc: "0.5 л", price: 150, image: "lemonade.jpg" }
         ],
         desserts: [
-            { name: "Тирамису", desc: "Классический итальянский десерт", price: 280, image: "tiramisu.jpg" }
+            { name: "Тирамису", desc: "Классический итальянский десерт", price: 280, image: "tiramisu.jpg" },
+            { name: "Чизкейк", desc: "Нежный сливочный", price: 250, image: "cheesecake.jpg" }
         ]
     };
 
-    // Рендер
+    // ========== РЕНДЕР МЕНЮ В ГРИД ==========
     function renderCategory(cat, containerId) {
         const container = document.getElementById(containerId);
         if (!container) return;
@@ -77,11 +81,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const orderModal = document.getElementById('orderModal');
     const closeOrderModal = document.getElementById('closeOrderModal');
     const orderTotalSpan = document.getElementById('orderTotal');
+    const orderProductSelect = document.getElementById('orderProduct');
+    const orderQuantitySelect = document.getElementById('orderQuantity');
+
+    function updateOrderTotal() {
+        const selected = orderProductSelect.value;
+        if (!selected) {
+            orderTotalSpan.innerText = '0 ₽';
+            return;
+        }
+        const price = parseInt(selected.split('|')[1]) || 0;
+        const quantity = parseInt(orderQuantitySelect.value) || 1;
+        orderTotalSpan.innerText = (price * quantity) + ' ₽';
+    }
+
+    orderProductSelect?.addEventListener('change', updateOrderTotal);
+    orderQuantitySelect?.addEventListener('change', updateOrderTotal);
 
     function openOrderModal(product = null) {
         if (product) {
-            document.getElementById('orderTotal').innerText = product.price + ' ₽';
-            window.currentOrderProduct = product;
+            for (let opt of orderProductSelect.options) {
+                if (opt.value.startsWith(product.name + '|')) {
+                    opt.selected = true;
+                    break;
+                }
+            }
+            updateOrderTotal();
         }
         orderModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
@@ -101,10 +126,16 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = '';
     });
 
-    // Отправка заказа
+    // Отправка заказа (демо)
     document.getElementById('orderModalForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        alert('Заказ отправлен! (демо-режим)');
+        const name = document.getElementById('orderName').value;
+        const phone = document.getElementById('orderPhone').value;
+        if (!name || !phone || !orderProductSelect.value) {
+            alert('Заполните имя, телефон и выберите позицию');
+            return;
+        }
+        alert(`Заказ отправлен!\nПозиция: ${orderProductSelect.options[orderProductSelect.selectedIndex].text}\nСумма: ${orderTotalSpan.innerText}`);
         orderModal.style.display = 'none';
         document.body.style.overflow = '';
     });
