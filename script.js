@@ -119,9 +119,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========== МОДАЛЬНЫЕ ОКНА ==========
     const productModal = document.getElementById('productModal');
     const orderModal = document.getElementById('orderModal');
+    const registerModal = document.getElementById('registerModal');
     const authModal = document.getElementById('authModal');
     const credsModal = document.getElementById('credsModal');
 
+    // Показать товар
     document.querySelectorAll('.view-product-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.getElementById('productImage').src = btn.dataset.img;
@@ -141,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('orderFromProductBtn')?.addEventListener('click', () => {
         productModal.style.display = 'none';
-        if (!isLoggedIn) { alert('Пожалуйста, войдите'); authModal.style.display = 'flex'; return; }
+        if (!isLoggedIn) { alert('Сначала зарегистрируйтесь и войдите'); registerModal.style.display = 'flex'; return; }
         openOrderModal();
         addToCart(window.currentProduct.name, window.currentProduct.price);
     });
@@ -155,37 +157,59 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.querySelectorAll('.order-trigger-main').forEach(btn => {
         btn.addEventListener('click', () => {
-            if (!isLoggedIn) { alert('Пожалуйста, войдите'); authModal.style.display = 'flex'; return; }
+            if (!isLoggedIn) { 
+                registerModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                return;
+            }
             openOrderModal();
         });
     });
 
-    document.getElementById('closeOrderModal')?.addEventListener('click', () => {
-        orderModal.style.display = 'none';
-        document.body.style.overflow = '';
+    // ========== РЕГИСТРАЦИЯ ==========
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('regName').value;
+        const phone = document.getElementById('regPhone').value;
+        const email = document.getElementById('regEmail').value;
+        const address = document.getElementById('regAddress').value;
+
+        if (!name || !phone) {
+            document.getElementById('registerMessage').innerHTML = '<div class="error">Заполните имя и телефон</div>';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api.php/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, phone, email, address })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('credsLogin').innerText = data.login;
+                document.getElementById('credsPassword').innerText = data.password;
+                registerModal.style.display = 'none';
+                credsModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.getElementById('registerMessage').innerHTML = `<div class="error">${data.error}</div>`;
+            }
+        } catch(err) {
+            document.getElementById('registerMessage').innerHTML = '<div class="error">Ошибка соединения</div>';
+        }
     });
 
-    // ========== АВТОРИЗАЦИЯ ==========
-    document.getElementById('loginBtn').addEventListener('click', () => {
-        authModal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    });
-    document.getElementById('mobileLoginBtn').addEventListener('click', () => {
-        authModal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    });
-    document.getElementById('closeAuthModal')?.addEventListener('click', () => {
-        authModal.style.display = 'none';
-        document.body.style.overflow = '';
-    });
-
+    // ========== ВХОД ==========
     document.getElementById('authForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const login = document.getElementById('authLogin').value;
         const password = document.getElementById('authPassword').value;
+
         try {
             const res = await fetch('/api.php/login', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ login, password })
             });
             const data = await res.json();
@@ -195,7 +219,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('userDisplay').innerHTML = `👋 ${data.user.full_name}`;
                 document.getElementById('orderBtn').style.display = 'inline-block';
                 document.getElementById('mobileOrderBtn').style.display = 'inline-block';
-                document.getElementById('headerOrderBtn').style.display = 'inline-block';
                 document.getElementById('loginBtn').style.display = 'none';
                 document.getElementById('mobileLoginBtn').style.display = 'none';
                 authModal.style.display = 'none';
@@ -205,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('authMessage').innerHTML = `<div class="error">${data.error}</div>`;
             }
         } catch(err) {
-            alert('Ошибка соединения');
+            document.getElementById('authMessage').innerHTML = '<div class="error">Ошибка соединения</div>';
         }
     });
 
@@ -218,22 +241,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const address = document.getElementById('orderAddress').value;
 
         if (!name || !phone) { alert('Заполните имя и телефон'); return; }
-        if (cart.length === 0) { alert('Добавьте позиции'); return; }
+        if (cart.length === 0) { alert('Добавьте позиции в корзину'); return; }
 
         const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
         const res = await fetch('/api.php/orders', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, phone, email, address, items: cart, total })
         });
         const data = await res.json();
         if (res.ok) {
             alert(`Заказ оформлен! Сумма: ${total} ₽`);
-            if (data.login && data.password) {
-                document.getElementById('credsLogin').innerText = data.login;
-                document.getElementById('credsPassword').innerText = data.password;
-                credsModal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
             cart = []; renderCartDisplay();
             orderModal.style.display = 'none';
             document.body.style.overflow = '';
@@ -242,15 +260,53 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // ========== КНОПКИ ПЕРЕКЛЮЧЕНИЯ МОДАЛОК ==========
+    document.getElementById('loginBtn').addEventListener('click', () => {
+        authModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    });
+    document.getElementById('mobileLoginBtn').addEventListener('click', () => {
+        authModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    });
+    document.getElementById('showRegFromLogin').addEventListener('click', (e) => {
+        e.preventDefault();
+        authModal.style.display = 'none';
+        registerModal.style.display = 'flex';
+    });
+    document.getElementById('showLoginFromReg').addEventListener('click', (e) => {
+        e.preventDefault();
+        registerModal.style.display = 'none';
+        authModal.style.display = 'flex';
+    });
+    document.getElementById('goToLoginBtn').addEventListener('click', () => {
+        credsModal.style.display = 'none';
+        authModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    });
+
+    document.getElementById('closeRegisterModal')?.addEventListener('click', () => {
+        registerModal.style.display = 'none';
+        document.body.style.overflow = '';
+    });
+    document.getElementById('closeAuthModal')?.addEventListener('click', () => {
+        authModal.style.display = 'none';
+        document.body.style.overflow = '';
+    });
     document.getElementById('closeCredsModal')?.addEventListener('click', () => {
         credsModal.style.display = 'none';
         document.body.style.overflow = '';
     });
+    document.getElementById('closeOrderModal')?.addEventListener('click', () => {
+        orderModal.style.display = 'none';
+        document.body.style.overflow = '';
+    });
+
     document.getElementById('copyCredsBtn')?.addEventListener('click', () => {
         const login = document.getElementById('credsLogin').innerText;
         const pass = document.getElementById('credsPassword').innerText;
         navigator.clipboard.writeText(`Логин: ${login}\nПароль: ${pass}`);
-        alert('Скопировано!');
+        alert('Данные скопированы!');
     });
 
     // ========== СЛАЙДЕР ==========
@@ -307,6 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('click', (e) => {
         if (e.target === productModal) { productModal.style.display = 'none'; document.body.style.overflow = ''; }
         if (e.target === orderModal) { orderModal.style.display = 'none'; document.body.style.overflow = ''; }
+        if (e.target === registerModal) { registerModal.style.display = 'none'; document.body.style.overflow = ''; }
         if (e.target === authModal) { authModal.style.display = 'none'; document.body.style.overflow = ''; }
         if (e.target === credsModal) { credsModal.style.display = 'none'; document.body.style.overflow = ''; }
     });
