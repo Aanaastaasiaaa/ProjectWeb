@@ -82,7 +82,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function loadCart() {
         const saved = localStorage.getItem('pizzaCart');
-        if (saved) cart = JSON.parse(saved);
+        if (saved) {
+            try {
+                cart = JSON.parse(saved);
+            } catch(e) { cart = []; }
+        }
         renderCart();
     }
 
@@ -91,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalSpan = document.getElementById('cartTotal');
         if (!container) return;
 
-        if (cart.length === 0) {
+        if (!cart || cart.length === 0) {
             container.innerHTML = '<div class="empty-cart">Корзина пуста</div>';
             if (totalSpan) totalSpan.innerText = '0 ₽';
             return;
@@ -105,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
             html += `
                 <div class="cart-item" data-index="${idx}">
                     <div class="cart-item-info">
-                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-name">${escapeHtml(item.name)}</div>
                         <div class="cart-item-price">${item.price} ₽</div>
                     </div>
                     <div class="cart-item-actions">
@@ -144,12 +148,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function addToCart(name, price) {
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function addToCart(name, price, qty = 1) {
         const existing = cart.find(item => item.name === name);
         if (existing) {
-            existing.qty += 1;
+            existing.qty += qty;
         } else {
-            cart.push({ name: name, price: price, qty: 1 });
+            cart.push({ name: name, price: price, qty: qty });
         }
         saveCart();
         renderCart();
@@ -168,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = 'hidden';
     }
 
-    document.getElementById('orderFromProductBtn').addEventListener('click', () => {
+    document.getElementById('orderFromProductBtn')?.addEventListener('click', () => {
         productModal.style.display = 'none';
         openOrderModal(window.currentProduct);
     });
@@ -183,58 +197,57 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Добавление позиции из выпадающего списка
-    document.getElementById('addToCartBtn')?.addEventListener('click', () => {
-        const select = document.getElementById('addProductSelect');
-        const selected = select.value;
-        if (!selected) {
-            alert('Выберите позицию');
-            return;
-        }
-        const qtyInput = document.getElementById('addProductQty');
-        let qty = parseInt(qtyInput.value);
-        if (isNaN(qty) || qty < 1) qty = 1;
+    const addToCartBtn = document.getElementById('addToCartBtn');
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', () => {
+            const select = document.getElementById('addProductSelect');
+            const selected = select.value;
+            if (!selected) {
+                alert('Выберите позицию');
+                return;
+            }
+            const qtyInput = document.getElementById('addProductQty');
+            let qty = parseInt(qtyInput.value);
+            if (isNaN(qty) || qty < 1) qty = 1;
 
-        const [name, priceStr] = selected.split('|');
-        const price = parseInt(priceStr);
+            const [name, priceStr] = selected.split('|');
+            const price = parseInt(priceStr);
 
-        const existing = cart.find(item => item.name === name);
-        if (existing) {
-            existing.qty += qty;
-        } else {
-            cart.push({ name: name, price: price, qty: qty });
-        }
-        saveCart();
-        renderCart();
-        select.value = '';
-        qtyInput.value = '1';
-    });
+            addToCart(name, price, qty);
+            select.value = '';
+            qtyInput.value = '1';
+        });
+    }
 
     // Отправка заказа
-    document.getElementById('orderModalForm')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('orderName').value.trim();
-        const phone = document.getElementById('orderPhone').value.trim();
+    const orderForm = document.getElementById('orderModalForm');
+    if (orderForm) {
+        orderForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('orderName').value.trim();
+            const phone = document.getElementById('orderPhone').value.trim();
 
-        if (!name || !phone) {
-            alert('Заполните имя и телефон');
-            return;
-        }
+            if (!name || !phone) {
+                alert('Заполните имя и телефон');
+                return;
+            }
 
-        if (cart.length === 0) {
-            alert('Добавьте хотя бы одну позицию в заказ');
-            return;
-        }
+            if (!cart || cart.length === 0) {
+                alert('Добавьте хотя бы одну позицию в заказ');
+                return;
+            }
 
-        const totalSpan = document.getElementById('cartTotal');
-        alert(`Заказ оформлен!\nКлиент: ${name}\nТелефон: ${phone}\n${cart.map(i => `${i.name} x${i.qty} = ${i.price * i.qty}₽`).join('\n')}\nИТОГО: ${totalSpan.innerText}`);
+            const totalSpan = document.getElementById('cartTotal');
+            alert(`Заказ оформлен!\nКлиент: ${name}\nТелефон: ${phone}\n${cart.map(i => `${i.name} x${i.qty} = ${i.price * i.qty}₽`).join('\n')}\nИТОГО: ${totalSpan.innerText}`);
 
-        // Очистка корзины
-        cart = [];
-        saveCart();
-        renderCart();
-        orderModal.style.display = 'none';
-        document.body.style.overflow = '';
-    });
+            // Очистка корзины
+            cart = [];
+            saveCart();
+            renderCart();
+            orderModal.style.display = 'none';
+            document.body.style.overflow = '';
+        });
+    }
 
     // ========== СЛАЙДЕР ==========
     const slides = [
@@ -267,11 +280,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        document.getElementById('sliderPrev')?.addEventListener('click', () => {
+        const prevBtn = document.getElementById('sliderPrev');
+        const nextBtn = document.getElementById('sliderNext');
+        if (prevBtn) prevBtn.addEventListener('click', () => {
             currentSlide = (currentSlide - 1 + slides.length) % slides.length;
             goToSlide(currentSlide);
         });
-        document.getElementById('sliderNext')?.addEventListener('click', () => {
+        if (nextBtn) nextBtn.addEventListener('click', () => {
             currentSlide = (currentSlide + 1) % slides.length;
             goToSlide(currentSlide);
         });
@@ -284,7 +299,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const href = this.getAttribute('href');
             if (href && href.startsWith('#')) {
                 e.preventDefault();
-                document.querySelector(href)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const target = document.querySelector(href);
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
     });
@@ -293,7 +309,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.mobile-dropdown-trigger').forEach(trigger => {
         trigger.addEventListener('click', (e) => {
             e.preventDefault();
-            trigger.nextElementSibling?.classList.toggle('active');
+            const dropdown = trigger.nextElementSibling;
+            if (dropdown) dropdown.classList.toggle('active');
         });
     });
 
@@ -307,6 +324,18 @@ document.addEventListener('DOMContentLoaded', function() {
             orderModal.style.display = 'none';
             document.body.style.overflow = '';
         }
+        const authModal = document.getElementById('authModal');
+        const credModal = document.getElementById('credentialsModal');
+        if (e.target === authModal) {
+            authModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        if (e.target === credModal) {
+            credModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
     });
 
+    // Инициализация корзины при загрузке
+    loadCart();
 });
