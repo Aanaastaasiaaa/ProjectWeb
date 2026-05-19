@@ -95,7 +95,8 @@ if ($action === 'order') {
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>PizzaMania</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PizzaMania - Лучшая пицца в городе</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -114,17 +115,27 @@ if ($action === 'order') {
         .dropdown-menu a { display: block; padding: 10px 20px; color: #333; text-decoration: none; }
         .dropdown-menu a:hover { background: #f8f9fa; color: #dc3545; }
         .login-btn { background: #ffd700; color: #333 !important; padding: 8px 20px; border-radius: 5px; }
-        .btn { background: #dc3545; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; }
+        .btn { background: #dc3545; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; transition: 0.3s; }
         .btn:hover { background: #c82333; transform: translateY(-2px); }
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; margin-top: 30px; }
-        .menu-item { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .menu-item { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: 0.3s; }
+        .menu-item:hover { transform: translateY(-5px); }
         .menu-item img { width: 100%; height: 200px; object-fit: cover; }
         .menu-item-content { padding: 20px; }
         .menu-item-title { font-size: 1.4rem; font-weight: 600; margin-bottom: 10px; }
         .menu-item-price { font-size: 1.3rem; font-weight: 700; color: #dc3545; margin: 15px 0; }
-        .category-title { font-size: 2rem; color: #dc3545; margin-bottom: 30px; border-bottom: 3px solid #dc3545; display: inline-block; }
+        .category-title { font-size: 2rem; color: #dc3545; margin-bottom: 30px; padding-bottom: 10px; border-bottom: 3px solid #dc3545; display: inline-block; }
         .section { padding: 60px 0; }
         .section-title { text-align: center; font-size: 2.5rem; margin-bottom: 50px; color: #dc3545; }
+        
+        /* Шапка с видео */
+        .header { position: relative; height: 100vh; min-height: 600px; overflow: hidden; display: flex; align-items: center; justify-content: center; color: white; margin-top: -130px; }
+        .header-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+        .header-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: -1; }
+        .header-content { text-align: center; z-index: 1; padding: 0 20px; }
+        .header h1 { font-size: 3rem; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .header p { font-size: 1.2rem; margin-bottom: 2rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 40px; border-radius: 10px; max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative; }
         .modal-close { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.8rem; cursor: pointer; }
@@ -142,7 +153,11 @@ if ($action === 'order') {
         .warning { color: #dc3545; font-size: 0.9rem; margin-top: 10px; }
         .mobile-nav { display: none; flex-direction: column; gap: 10px; margin-top: 15px; }
         .mobile-nav-link { color: white; text-decoration: none; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; text-align: center; }
-        @media (max-width: 768px) { .nav-menu { display: none; } .mobile-nav { display: flex; } }
+        .product-modal { text-align: center; max-width: 500px; }
+        .product-modal img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 10px; margin-bottom: 15px; }
+        .product-price { font-size: 1.5rem; font-weight: bold; color: #dc3545; margin: 15px 0; }
+        .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 10px 0; text-align: center; }
+        @media (max-width: 768px) { .nav-menu { display: none; } .mobile-nav { display: flex; } .header h1 { font-size: 2rem; } }
     </style>
 </head>
 <body>
@@ -176,8 +191,16 @@ if ($action === 'order') {
     </div>
 </nav>
 
-<header class="header" id="home" style="height:100vh; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); display:flex; align-items:center; justify-content:center; text-align:center; color:white; margin-top:-130px;">
-    <div><h1 style="font-size:3rem;">Лучшая пицца в городе</h1><p style="font-size:1.2rem;">Настоящая итальянская пицца с дровяной печи</p><button class="btn" id="headerOrderBtn">Заказать сейчас</button></div>
+<header class="header" id="home">
+    <video autoplay muted loop class="header-video">
+        <source src="vid.mp4" type="video/mp4">
+    </video>
+    <div class="header-overlay"></div>
+    <div class="header-content">
+        <h1>Лучшая пицца в городе</h1>
+        <p>Настоящая итальянская пицца с дровяной печи</p>
+        <button class="btn" id="headerOrderBtn">Заказать сейчас</button>
+    </div>
 </header>
 
 <section id="pizza" class="section"><div class="container"><h3 class="category-title">🍕 Пицца</h3><div class="menu-grid" id="pizzaGrid"></div></div></section>
@@ -185,8 +208,8 @@ if ($action === 'order') {
 <section id="salads" class="section"><div class="container"><h3 class="category-title">🥗 Салаты</h3><div class="menu-grid" id="saladsGrid"></div></div></section>
 <section id="drinks" class="section"><div class="container"><h3 class="category-title">🥤 Напитки</h3><div class="menu-grid" id="drinksGrid"></div></div></section>
 <section id="desserts" class="section"><div class="container"><h3 class="category-title">🍰 Десерты</h3><div class="menu-grid" id="dessertsGrid"></div></div></section>
-<section id="about" class="section"><div class="container"><h2 class="section-title">О нашей пиццерии</h2><p>Мы - семейная пиццерия с более чем 20-летним опытом.</p></div></section>
-<section id="gallery" class="section"><div class="container"><h2 class="section-title">Галерея</h2><div style="height:300px; background:#ddd; display:flex; align-items:center; justify-content:center;">Здесь будут фото</div></div></section>
+<section id="about" class="section"><div class="container"><h2 class="section-title">О нашей пиццерии</h2><p style="text-align:center;">Мы - семейная пиццерия с более чем 20-летним опытом приготовления настоящей итальянской пиццы.</p></div></section>
+<section id="gallery" class="section"><div class="container"><h2 class="section-title">Наша галерея</h2><div style="height:300px; background:#ddd; display:flex; align-items:center; justify-content:center;">Здесь будут фото</div></div></section>
 <footer class="footer" style="background:#343a40; color:white; text-align:center; padding:50px;"><p>Ежедневно с 10:00 до 23:00</p><p>Телефон: +7 (999) 999-99-99</p></footer>
 
 <!-- Модалки -->
@@ -222,6 +245,7 @@ if ($action === 'order') {
 <div id="productModal" class="modal"><div class="modal-content product-modal"><button class="modal-close" id="closeProductModal">×</button><img id="productImage" src=""><h3 id="productName"></h3><p id="productDesc"></p><div class="product-price" id="productPrice"></div><button id="orderFromProductBtn" class="btn">Заказать</button></div></div>
 
 <script>
+// ДАННЫЕ МЕНЮ
 const menuData = {
     pizza: [{ name: "Маргарита", desc: "Томатный соус, моцарелла, базилик", price: 450, image: "margarita.webp" },
             { name: "Пепперони", desc: "Томатный соус, моцарелла, пепперони", price: 550, image: "peporoni.webp" },
@@ -232,38 +256,211 @@ const menuData = {
     desserts: [{ name: "Тирамису", desc: "Классический итальянский десерт", price: 280, image: "tiramisu.jpg" }]
 };
 
-function renderCategory(cat, id) { let c = document.getElementById(id); if(!c) return; c.innerHTML = ''; menuData[cat].forEach(i => { c.innerHTML += `<div class="menu-item"><img src="${i.image}"><div class="menu-item-content"><h3>${i.name}</h3><p>${i.desc}</p><div class="menu-item-price">${i.price} ₽</div><button class="btn view-btn" data-name="${i.name}" data-price="${i.price}" data-desc="${i.desc}" data-img="${i.image}">Подробнее</button></div></div>`; }); }
-renderCategory('pizza','pizzaGrid'); renderCategory('pasta','pastaGrid'); renderCategory('salads','saladsGrid'); renderCategory('drinks','drinksGrid'); renderCategory('desserts','dessertsGrid');
+function renderCategory(cat, id) {
+    let c = document.getElementById(id);
+    if(!c) return;
+    c.innerHTML = '';
+    menuData[cat].forEach(item => {
+        c.innerHTML += `<div class="menu-item"><img src="${item.image}" alt="${item.name}"><div class="menu-item-content"><h3 class="menu-item-title">${item.name}</h3><p>${item.desc}</p><div class="menu-item-price">${item.price} ₽</div><button class="btn view-btn" data-name="${item.name}" data-price="${item.price}" data-desc="${item.desc}" data-img="${item.image}">Подробнее</button></div></div>`;
+    });
+}
 
-let cart = [], isLoggedIn = false;
-function addToCart(name, price) { let e = cart.find(i=>i.name===name); if(e) e.qty++; else cart.push({name,price,qty:1}); renderCart(); }
-function removeFromCart(i) { cart.splice(i,1); renderCart(); }
-function renderCart() { let c = document.getElementById('cartItems'), t = document.getElementById('orderTotal'); if(!c) return; if(cart.length===0){ c.innerHTML='Корзина пуста'; if(t) t.innerText='0'; return; } let h='', total=0; cart.forEach((it,i)=>{ total+=it.price*it.qty; h+=`<div class="cart-item"><span>${it.name} x${it.qty} = ${it.price*it.qty} ₽</span><button class="remove-item" data-i="${i}">Удалить</button></div>`; }); c.innerHTML=h; if(t) t.innerText=total; document.querySelectorAll('.remove-item').forEach(b=>{ b.addEventListener('click',()=>removeFromCart(parseInt(b.dataset.i))); }); }
-function renderModalMenu() { let c = document.getElementById('modalMenuList'); if(!c) return; c.innerHTML=''; let all = [...menuData.pizza.map(i=>({name:i.name,price:i.price})), ...menuData.pasta.map(i=>({name:i.name,price:i.price})), ...menuData.salads.map(i=>({name:i.name,price:i.price})), ...menuData.drinks.map(i=>({name:i.name,price:i.price})), ...menuData.desserts.map(i=>({name:i.name,price:i.price}))]; all.forEach(i=>{ let d=document.createElement('div'); d.className='menu-item-row'; d.innerHTML=`<span>${i.name} - ${i.price} ₽</span><button class="add-to-cart-btn" data-name="${i.name}" data-price="${i.price}">+</button>`; c.appendChild(d); }); document.querySelectorAll('.add-to-cart-btn').forEach(b=>{ b.addEventListener('click',()=>addToCart(b.dataset.name,parseInt(b.dataset.price))); }); }
+renderCategory('pizza','pizzaGrid');
+renderCategory('pasta','pastaGrid');
+renderCategory('salads','saladsGrid');
+renderCategory('drinks','drinksGrid');
+renderCategory('desserts','dessertsGrid');
 
-document.querySelectorAll('.view-btn').forEach(b=>{ b.addEventListener('click',()=>{ document.getElementById('productImage').src=b.dataset.img; document.getElementById('productName').innerText=b.dataset.name; document.getElementById('productDesc').innerText=b.dataset.desc; document.getElementById('productPrice').innerHTML=b.dataset.price+' ₽'; window.currentProduct={name:b.dataset.name,price:parseInt(b.dataset.price)}; document.getElementById('productModal').style.display='flex'; }); });
-document.getElementById('closeProductModal')?.addEventListener('click',()=>{ document.getElementById('productModal').style.display='none'; });
-document.getElementById('orderFromProductBtn')?.addEventListener('click',()=>{ document.getElementById('productModal').style.display='none'; if(!isLoggedIn){ alert('Сначала зарегистрируйтесь'); document.getElementById('registerModal').style.display='flex'; return; } openOrderModal(); addToCart(window.currentProduct.name,window.currentProduct.price); });
+// КОРЗИНА
+let cart = [];
+let isLoggedIn = false;
 
-function openOrderModal() { renderModalMenu(); renderCart(); document.getElementById('orderModal').style.display='flex'; }
-document.getElementById('orderBtn')?.addEventListener('click',()=>{ if(!isLoggedIn){ alert('Сначала войдите'); document.getElementById('authModal').style.display='flex'; return; } openOrderModal(); });
-document.getElementById('mobileOrderBtn')?.addEventListener('click',()=>{ if(!isLoggedIn){ alert('Сначала войдите'); document.getElementById('authModal').style.display='flex'; return; } openOrderModal(); });
-document.getElementById('headerOrderBtn')?.addEventListener('click',()=>{ if(!isLoggedIn){ alert('Сначала войдите'); document.getElementById('authModal').style.display='flex'; return; } openOrderModal(); });
+function addToCart(name, price) {
+    let existing = cart.find(i => i.name === name);
+    if(existing) existing.qty++;
+    else cart.push({name, price, qty: 1});
+    renderCart();
+}
 
-document.getElementById('registerForm')?.addEventListener('submit', async(e)=>{ e.preventDefault(); let fd = new FormData(); fd.append('name', document.getElementById('regName').value); fd.append('phone', document.getElementById('regPhone').value); fd.append('email', document.getElementById('regEmail').value); fd.append('address', document.getElementById('regAddress').value); let r = await fetch('?action=register',{method:'POST',body:fd}); let d = await r.json(); if(d.success){ document.getElementById('credsLogin').innerText=d.login; document.getElementById('credsPassword').innerText=d.password; document.getElementById('registerModal').style.display='none'; document.getElementById('credsModal').style.display='flex'; } else { document.getElementById('registerMessage').innerHTML='<div class="error">'+d.error+'</div>'; } });
-document.getElementById('authForm')?.addEventListener('submit', async(e)=>{ e.preventDefault(); let fd = new FormData(); fd.append('login', document.getElementById('authLogin').value); fd.append('password', document.getElementById('authPassword').value); let r = await fetch('?action=login',{method:'POST',body:fd}); let d = await r.json(); if(d.success){ isLoggedIn=true; document.getElementById('userDisplay').innerHTML='👋 '+d.user.full_name; document.getElementById('orderBtn').style.display='inline-block'; document.getElementById('mobileOrderBtn').style.display='inline-block'; document.getElementById('loginBtn').style.display='none'; document.getElementById('mobileLoginBtn').style.display='none'; document.getElementById('authModal').style.display='none'; alert('Добро пожаловать!'); } else { document.getElementById('authMessage').innerHTML='<div class="error">'+d.error+'</div>'; } });
-document.getElementById('orderForm')?.addEventListener('submit', async(e)=>{ e.preventDefault(); let items = cart.map(i=>i.name+' x'+i.qty).join(', '); let fd = new FormData(); fd.append('name', document.getElementById('orderName').value); fd.append('phone', document.getElementById('orderPhone').value); fd.append('email', document.getElementById('orderEmail').value); fd.append('address', document.getElementById('orderAddress').value); fd.append('items', items); fd.append('total', document.getElementById('orderTotal').innerText); let r = await fetch('?action=order',{method:'POST',body:fd}); let d = await r.json(); if(d.success){ alert('Заказ оформлен!'); cart=[]; renderCart(); document.getElementById('orderModal').style.display='none'; } else { alert('Ошибка: '+d.error); } });
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    renderCart();
+}
 
-document.getElementById('loginBtn')?.addEventListener('click',()=>{ document.getElementById('authModal').style.display='flex'; });
-document.getElementById('mobileLoginBtn')?.addEventListener('click',()=>{ document.getElementById('authModal').style.display='flex'; });
-document.getElementById('closeRegisterModal')?.addEventListener('click',()=>{ document.getElementById('registerModal').style.display='none'; });
-document.getElementById('closeAuthModal')?.addEventListener('click',()=>{ document.getElementById('authModal').style.display='none'; });
-document.getElementById('closeCredsModal')?.addEventListener('click',()=>{ document.getElementById('credsModal').style.display='none'; });
-document.getElementById('closeOrderModal')?.addEventListener('click',()=>{ document.getElementById('orderModal').style.display='none'; });
-document.getElementById('showRegFromLogin')?.addEventListener('click',(e)=>{ e.preventDefault(); document.getElementById('authModal').style.display='none'; document.getElementById('registerModal').style.display='flex'; });
-document.getElementById('showLoginFromReg')?.addEventListener('click',(e)=>{ e.preventDefault(); document.getElementById('registerModal').style.display='none'; document.getElementById('authModal').style.display='flex'; });
-document.getElementById('goToLoginBtn')?.addEventListener('click',()=>{ document.getElementById('credsModal').style.display='none'; document.getElementById('authModal').style.display='flex'; });
-document.getElementById('copyCredsBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText('Логин: '+document.getElementById('credsLogin').innerText+'\nПароль: '+document.getElementById('credsPassword').innerText); alert('Скопировано!'); });
+function renderCart() {
+    let container = document.getElementById('cartItems');
+    let totalSpan = document.getElementById('orderTotal');
+    if(!container) return;
+    if(cart.length === 0) {
+        container.innerHTML = 'Корзина пуста';
+        if(totalSpan) totalSpan.innerText = '0';
+        return;
+    }
+    let html = '', total = 0;
+    cart.forEach((item, idx) => {
+        total += item.price * item.qty;
+        html += `<div class="cart-item"><span>${item.name} x${item.qty} = ${item.price * item.qty} ₽</span><button class="remove-item" data-index="${idx}">Удалить</button></div>`;
+    });
+    container.innerHTML = html;
+    if(totalSpan) totalSpan.innerText = total;
+    document.querySelectorAll('.remove-item').forEach(btn => {
+        btn.addEventListener('click', () => removeFromCart(parseInt(btn.dataset.index)));
+    });
+}
+
+function renderModalMenu() {
+    let container = document.getElementById('modalMenuList');
+    if(!container) return;
+    container.innerHTML = '';
+    let allItems = [
+        ...menuData.pizza.map(i => ({name: i.name, price: i.price})),
+        ...menuData.pasta.map(i => ({name: i.name, price: i.price})),
+        ...menuData.salads.map(i => ({name: i.name, price: i.price})),
+        ...menuData.drinks.map(i => ({name: i.name, price: i.price})),
+        ...menuData.desserts.map(i => ({name: i.name, price: i.price}))
+    ];
+    allItems.forEach(item => {
+        let row = document.createElement('div');
+        row.className = 'menu-item-row';
+        row.innerHTML = `<span>${item.name} - ${item.price} ₽</span><button class="add-to-cart-btn" data-name="${item.name}" data-price="${item.price}">+</button>`;
+        container.appendChild(row);
+    });
+    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+        btn.addEventListener('click', () => addToCart(btn.dataset.name, parseInt(btn.dataset.price)));
+    });
+}
+
+// ПОДРОБНЕЕ
+document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.getElementById('productImage').src = btn.dataset.img;
+        document.getElementById('productName').innerText = btn.dataset.name;
+        document.getElementById('productDesc').innerText = btn.dataset.desc;
+        document.getElementById('productPrice').innerHTML = btn.dataset.price + ' ₽';
+        window.currentProduct = {name: btn.dataset.name, price: parseInt(btn.dataset.price)};
+        document.getElementById('productModal').style.display = 'flex';
+    });
+});
+
+document.getElementById('closeProductModal')?.addEventListener('click', () => {
+    document.getElementById('productModal').style.display = 'none';
+});
+
+document.getElementById('orderFromProductBtn')?.addEventListener('click', () => {
+    document.getElementById('productModal').style.display = 'none';
+    if(!isLoggedIn) {
+        alert('Сначала зарегистрируйтесь');
+        document.getElementById('registerModal').style.display = 'flex';
+        return;
+    }
+    openOrderModal();
+    addToCart(window.currentProduct.name, window.currentProduct.price);
+});
+
+function openOrderModal() {
+    renderModalMenu();
+    renderCart();
+    document.getElementById('orderModal').style.display = 'flex';
+}
+
+// КНОПКИ ЗАКАЗА
+document.getElementById('orderBtn')?.addEventListener('click', () => {
+    if(!isLoggedIn) { alert('Сначала войдите'); document.getElementById('authModal').style.display = 'flex'; return; }
+    openOrderModal();
+});
+document.getElementById('mobileOrderBtn')?.addEventListener('click', () => {
+    if(!isLoggedIn) { alert('Сначала войдите'); document.getElementById('authModal').style.display = 'flex'; return; }
+    openOrderModal();
+});
+document.getElementById('headerOrderBtn')?.addEventListener('click', () => {
+    if(!isLoggedIn) { alert('Сначала войдите'); document.getElementById('authModal').style.display = 'flex'; return; }
+    openOrderModal();
+});
+
+// РЕГИСТРАЦИЯ
+document.getElementById('registerForm')?.addEventListener('submit', async(e) => {
+    e.preventDefault();
+    let fd = new FormData();
+    fd.append('name', document.getElementById('regName').value);
+    fd.append('phone', document.getElementById('regPhone').value);
+    fd.append('email', document.getElementById('regEmail').value);
+    fd.append('address', document.getElementById('regAddress').value);
+    let r = await fetch('?action=register', {method:'POST', body:fd});
+    let d = await r.json();
+    if(d.success) {
+        document.getElementById('credsLogin').innerText = d.login;
+        document.getElementById('credsPassword').innerText = d.password;
+        document.getElementById('registerModal').style.display = 'none';
+        document.getElementById('credsModal').style.display = 'flex';
+    } else {
+        document.getElementById('registerMessage').innerHTML = '<div class="error">'+d.error+'</div>';
+    }
+});
+
+// ВХОД
+document.getElementById('authForm')?.addEventListener('submit', async(e) => {
+    e.preventDefault();
+    let fd = new FormData();
+    fd.append('login', document.getElementById('authLogin').value);
+    fd.append('password', document.getElementById('authPassword').value);
+    let r = await fetch('?action=login', {method:'POST', body:fd});
+    let d = await r.json();
+    if(d.success) {
+        isLoggedIn = true;
+        document.getElementById('userDisplay').innerHTML = '👋 ' + d.user.full_name;
+        document.getElementById('orderBtn').style.display = 'inline-block';
+        document.getElementById('mobileOrderBtn').style.display = 'inline-block';
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('mobileLoginBtn').style.display = 'none';
+        document.getElementById('authModal').style.display = 'none';
+        alert('Добро пожаловать!');
+    } else {
+        document.getElementById('authMessage').innerHTML = '<div class="error">'+d.error+'</div>';
+    }
+});
+
+// ОФОРМЛЕНИЕ ЗАКАЗА
+document.getElementById('orderForm')?.addEventListener('submit', async(e) => {
+    e.preventDefault();
+    let itemsStr = cart.map(i => i.name + ' x' + i.qty).join(', ');
+    let fd = new FormData();
+    fd.append('name', document.getElementById('orderName').value);
+    fd.append('phone', document.getElementById('orderPhone').value);
+    fd.append('email', document.getElementById('orderEmail').value);
+    fd.append('address', document.getElementById('orderAddress').value);
+    fd.append('items', itemsStr);
+    fd.append('total', document.getElementById('orderTotal').innerText);
+    let r = await fetch('?action=order', {method:'POST', body:fd});
+    let d = await r.json();
+    if(d.success) {
+        alert('Заказ оформлен! Сумма: ' + document.getElementById('orderTotal').innerText + ' ₽');
+        cart = [];
+        renderCart();
+        document.getElementById('orderModal').style.display = 'none';
+    } else {
+        alert('Ошибка: ' + d.error);
+    }
+});
+
+// КНОПКИ ПЕРЕКЛЮЧЕНИЯ
+document.getElementById('loginBtn')?.addEventListener('click', () => { document.getElementById('authModal').style.display = 'flex'; });
+document.getElementById('mobileLoginBtn')?.addEventListener('click', () => { document.getElementById('authModal').style.display = 'flex'; });
+document.getElementById('closeRegisterModal')?.addEventListener('click', () => { document.getElementById('registerModal').style.display = 'none'; });
+document.getElementById('closeAuthModal')?.addEventListener('click', () => { document.getElementById('authModal').style.display = 'none'; });
+document.getElementById('closeCredsModal')?.addEventListener('click', () => { document.getElementById('credsModal').style.display = 'none'; });
+document.getElementById('closeOrderModal')?.addEventListener('click', () => { document.getElementById('orderModal').style.display = 'none'; });
+document.getElementById('showRegFromLogin')?.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('authModal').style.display = 'none'; document.getElementById('registerModal').style.display = 'flex'; });
+document.getElementById('showLoginFromReg')?.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('registerModal').style.display = 'none'; document.getElementById('authModal').style.display = 'flex'; });
+document.getElementById('goToLoginBtn')?.addEventListener('click', () => { document.getElementById('credsModal').style.display = 'none'; document.getElementById('authModal').style.display = 'flex'; });
+document.getElementById('copyCredsBtn')?.addEventListener('click', () => { navigator.clipboard.writeText('Логин: '+document.getElementById('credsLogin').innerText+'\nПароль: '+document.getElementById('credsPassword').innerText); alert('Скопировано!'); });
+
+// Мобильное меню
+document.querySelectorAll('.mobile-dropdown-trigger')?.forEach(tr => {
+    tr.addEventListener('click', e => { e.preventDefault(); tr.nextElementSibling?.classList.toggle('active'); });
+});
+window.addEventListener('click', (e) => {
+    if(e.target.classList?.contains('modal')) e.target.style.display = 'none';
+});
 </script>
 </body>
 </html>
