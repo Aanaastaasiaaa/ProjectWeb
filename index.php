@@ -157,6 +157,76 @@ if ($action === 'order') {
         .product-price { font-size: 1.5rem; font-weight: bold; color: #dc3545; margin: 15px 0; }
         .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 10px 0; text-align: center; }
         @media (max-width: 768px) { .nav-menu { display: none; } .mobile-nav { display: flex; } .header h1 { font-size: 2rem; } }
+        /* Слайдер */
+.slider {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin-top: 30px;
+}
+.slider-track {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+.slide {
+    min-width: 100%;
+    position: relative;
+}
+.slide img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+}
+.slide h3 {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.5);
+    padding: 5px 15px;
+    border-radius: 5px;
+}
+.slider-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(220,53,69,0.8);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background 0.3s;
+    z-index: 10;
+}
+.slider-nav:hover {
+    background: rgba(220,53,69,1);
+}
+.slider-prev { left: 10px; }
+.slider-next { right: 10px; }
+.slider-dots {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+    gap: 10px;
+}
+.slider-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ddd;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.slider-dot.active {
+    background: #dc3545;
+}
     </style>
 </head>
 <body>
