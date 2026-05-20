@@ -128,7 +128,6 @@ if ($action === 'order') {
         .section { padding: 60px 0; }
         .section-title { text-align: center; font-size: 2.5rem; margin-bottom: 50px; color: #dc3545; }
         
-        /* Шапка с видео */
         .header { position: relative; height: 100vh; min-height: 600px; overflow: hidden; display: flex; align-items: center; justify-content: center; color: white; margin-top: -130px; }
         .header-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
         .header-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: -1; }
@@ -324,11 +323,14 @@ function renderModalMenu() {
     allItems.forEach(item => {
         let row = document.createElement('div');
         row.className = 'menu-item-row';
-        row.innerHTML = `<span>${item.name} - ${item.price} ₽</span><button class="add-to-cart-btn" data-name="${item.name}" data-price="${item.price}">+</button>`;
+        row.innerHTML = `<span>${item.name} - ${item.price} ₽</span><button type="button" class="add-to-cart-btn" data-name="${item.name}" data-price="${item.price}">+</button>`;
         container.appendChild(row);
     });
     document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-        btn.addEventListener('click', () => addToCart(btn.dataset.name, parseInt(btn.dataset.price)));
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            addToCart(btn.dataset.name, parseInt(btn.dataset.price));
+        });
     });
 }
 
@@ -421,7 +423,7 @@ document.getElementById('authForm')?.addEventListener('submit', async(e) => {
     }
 });
 
-// ОФОРМЛЕНИЕ ЗАКАЗА (ТОЛЬКО ПО КНОПКЕ)
+// ОФОРМЛЕНИЕ ЗАКАЗА (ТОЛЬКО ПО КНОПКЕ "ОФОРМИТЬ")
 document.getElementById('orderForm')?.addEventListener('submit', async(e) => {
     e.preventDefault();
     if(cart.length === 0) {
