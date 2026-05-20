@@ -251,10 +251,11 @@ const menuData = {
         { name: "Пепперони", desc: "Томатный соус, моцарелла, пепперони", price: 550, image: "peporoni.webp" },
         { name: "Четыре сыра", desc: "Моцарелла, горгонзола, пармезан, фета", price: 600, image: "4cheese.jfif" }
     ],
-    pasta: [{ name: "Карбонара", desc: "Спагетти, бекон, сливочный соус", price: 420, image: "carbonara.jpg" }],
-    salads: [{ name: "Цезарь", desc: "Курица, пармезан, соус Цезарь", price: 350, image: "caesar.jpg" }],
-    drinks: [{ name: "Coca-Cola", desc: "0.5 л", price: 120, image: "coca.jpg" }],
-    desserts: [{ name: "Тирамису", desc: "Классический итальянский десерт", price: 280, image: "tiramisu.jpg" }]
+    pasta: [{ name: "Карбонара", desc: "Спагетти, бекон, сливочный соус", price: 420, image: "karbonara.webp" },
+           { name: "Паста с креветками", desc: "Спагетти, сливочный соус, креветки", price: 500, image: "krev.png" }],
+    salads: [{ name: "Цезарь", desc: "Курица, пармезан, соус Цезарь", price: 350, image: "tsezar.webp" }],
+    drinks: [{ name: "Coca-Cola", desc: "0.5 л", price: 120, image: "cola.webp" }],
+    desserts: [{ name: "Тирамису", desc: "Классический итальянский десерт", price: 280, image: "tiramisu.avif" }]
 };
 
 function renderCategory(cat, id) {
