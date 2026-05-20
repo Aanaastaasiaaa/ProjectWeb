@@ -229,7 +229,7 @@ if ($action === 'order') {
 
 <div id="credsModal" class="modal"><div class="modal-content"><button class="modal-close" id="closeCredsModal">×</button><h2>Регистрация завершена!</h2>
 <p>Ваши данные для входа:</p><p><strong>Логин:</strong> <span id="credsLogin"></span></p><p><strong>Пароль:</strong> <span id="credsPassword"></span></p>
-<p class="warning">Сохраните их!</p><button id="copyCredsBtn" class="btn" style="width:100%">Скопировать</button>
+<p class="warning">Сохраните их!</p>
 <button id="goToLoginBtn" class="btn" style="width:100%; margin-top:10px; background:#28a745;">Перейти ко входу</button></div></div>
 
 <div id="orderModal" class="modal"><div class="modal-content"><button class="modal-close" id="closeOrderModal">×</button><h2>Оформление заказа</h2>
@@ -247,9 +247,11 @@ if ($action === 'order') {
 <script>
 // ДАННЫЕ МЕНЮ
 const menuData = {
-    pizza: [{ name: "Маргарита", desc: "Томатный соус, моцарелла, базилик", price: 450, image: "margarita.webp" },
-            { name: "Пепперони", desc: "Томатный соус, моцарелла, пепперони", price: 550, image: "peporoni.webp" },
-            { name: "Четыре сыра", desc: "Моцарелла, горгонзола, пармезан, фета", price: 600, image: "4cheese.jfif" }],
+    pizza: [
+        { name: "Маргарита", desc: "Томатный соус, моцарелла, базилик", price: 450, image: "margarita.webp" },
+        { name: "Пепперони", desc: "Томатный соус, моцарелла, пепперони", price: 550, image: "peporoni.webp" },
+        { name: "Четыре сыра", desc: "Моцарелла, горгонзола, пармезан, фета", price: 600, image: "4cheese.jfif" }
+    ],
     pasta: [{ name: "Карбонара", desc: "Спагетти, бекон, сливочный соус", price: 420, image: "carbonara.jpg" }],
     salads: [{ name: "Цезарь", desc: "Курица, пармезан, соус Цезарь", price: 350, image: "caesar.jpg" }],
     drinks: [{ name: "Coca-Cola", desc: "0.5 л", price: 120, image: "coca.jpg" }],
@@ -419,9 +421,13 @@ document.getElementById('authForm')?.addEventListener('submit', async(e) => {
     }
 });
 
-// ОФОРМЛЕНИЕ ЗАКАЗА
+// ОФОРМЛЕНИЕ ЗАКАЗА (ТОЛЬКО ПО КНОПКЕ)
 document.getElementById('orderForm')?.addEventListener('submit', async(e) => {
     e.preventDefault();
+    if(cart.length === 0) {
+        alert('Добавьте позиции в корзину');
+        return;
+    }
     let itemsStr = cart.map(i => i.name + ' x' + i.qty).join(', ');
     let fd = new FormData();
     fd.append('name', document.getElementById('orderName').value);
@@ -452,7 +458,6 @@ document.getElementById('closeOrderModal')?.addEventListener('click', () => { do
 document.getElementById('showRegFromLogin')?.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('authModal').style.display = 'none'; document.getElementById('registerModal').style.display = 'flex'; });
 document.getElementById('showLoginFromReg')?.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('registerModal').style.display = 'none'; document.getElementById('authModal').style.display = 'flex'; });
 document.getElementById('goToLoginBtn')?.addEventListener('click', () => { document.getElementById('credsModal').style.display = 'none'; document.getElementById('authModal').style.display = 'flex'; });
-document.getElementById('copyCredsBtn')?.addEventListener('click', () => { navigator.clipboard.writeText('Логин: '+document.getElementById('credsLogin').innerText+'\nПароль: '+document.getElementById('credsPassword').innerText); alert('Скопировано!'); });
 
 // Мобильное меню
 document.querySelectorAll('.mobile-dropdown-trigger')?.forEach(tr => {
