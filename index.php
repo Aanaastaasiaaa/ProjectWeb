@@ -208,7 +208,17 @@ if ($action === 'order') {
 <section id="drinks" class="section"><div class="container"><h3 class="category-title">🥤 Напитки</h3><div class="menu-grid" id="drinksGrid"></div></div></section>
 <section id="desserts" class="section"><div class="container"><h3 class="category-title">🍰 Десерты</h3><div class="menu-grid" id="dessertsGrid"></div></div></section>
 <section id="about" class="section"><div class="container"><h2 class="section-title">О нашей пиццерии</h2><p style="text-align:center;">Мы - семейная пиццерия с более чем 20-летним опытом приготовления настоящей итальянской пиццы.</p></div></section>
-<section id="gallery" class="section"><div class="container"><h2 class="section-title">Наша галерея</h2><div style="height:300px; background:#ddd; display:flex; align-items:center; justify-content:center;">Здесь будут фото</div></div></section>
+<section id="gallery" class="section">
+    <div class="container">
+        <h2 class="section-title">Наша галерея</h2>
+        <div class="slider" id="slider">
+            <div class="slider-track" id="sliderTrack"></div>
+            <button class="slider-nav slider-prev" id="sliderPrev">‹</button>
+            <button class="slider-nav slider-next" id="sliderNext">›</button>
+            <div class="slider-dots" id="sliderDots"></div>
+        </div>
+    </div>
+</section>
 <footer class="footer" style="background:#343a40; color:white; text-align:center; padding:50px;"><p>Ежедневно с 10:00 до 23:00</p><p>Телефон: +7 (999) 999-99-99</p></footer>
 
 <!-- Модалки -->
@@ -469,6 +479,50 @@ document.querySelectorAll('.mobile-dropdown-trigger')?.forEach(tr => {
 window.addEventListener('click', (e) => {
     if(e.target.classList?.contains('modal')) e.target.style.display = 'none';
 });
+    // ========== СЛАЙДЕР ==========
+const slides = [
+    { image: "pech.webp", caption: "Наша фирменная печь на дровах" },
+    { image: "ing.jpg", caption: "Свежие ингредиенты высшего качества" },
+    { image: "з.webp", caption: "Идеальная хрустящая корочка" }
+];
+
+const sliderTrack = document.getElementById('sliderTrack');
+const sliderDots = document.getElementById('sliderDots');
+let currentSlide = 0;
+
+if (sliderTrack && sliderDots) {
+    slides.forEach((slide, index) => {
+        const slideDiv = document.createElement('div');
+        slideDiv.className = 'slide';
+        slideDiv.innerHTML = `<img src="${slide.image}" alt="slide"><h3>${slide.caption}</h3>`;
+        sliderTrack.appendChild(slideDiv);
+        
+        const dot = document.createElement('div');
+        dot.className = index === 0 ? 'slider-dot active' : 'slider-dot';
+        dot.addEventListener('click', () => goToSlide(index));
+        sliderDots.appendChild(dot);
+    });
+    
+    function goToSlide(index) {
+        currentSlide = index;
+        sliderTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
+        document.querySelectorAll('.slider-dot').forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentSlide);
+        });
+    }
+    
+    document.getElementById('sliderPrev')?.addEventListener('click', () => {
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+        goToSlide(currentSlide);
+    });
+    
+    document.getElementById('sliderNext')?.addEventListener('click', () => {
+        currentSlide = (currentSlide + 1) % slides.length;
+        goToSlide(currentSlide);
+    });
+    
+    goToSlide(0);
+}
 </script>
 </body>
 </html>
