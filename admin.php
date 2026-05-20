@@ -43,12 +43,6 @@ if (isset($_GET['delete_user']) && is_numeric($_GET['delete_user'])) {
     exit;
 }
 
-if (isset($_POST['update_status'])) {
-    $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?")->execute([$_POST['status'], $_POST['order_id']]);
-    header('Location: admin.php');
-    exit;
-}
-
 // ========== ДАННЫЕ ==========
 $users = $pdo->query("SELECT id, full_name, phone, email, login, created_at FROM users ORDER BY id DESC")->fetchAll();
 $orders = $pdo->query("
@@ -124,17 +118,6 @@ $total_revenue = $pdo->query("SELECT SUM(total_price) FROM orders")->fetchColumn
         th { background: #f8f9fa; }
         tr:hover { background: #f8f9fa; }
         
-        .status {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 15px;
-            font-size: 0.75rem;
-        }
-        .status-new { background: #ffc107; }
-        .status-processing { background: #17a2b8; color: white; }
-        .status-completed { background: #28a745; color: white; }
-        .status-cancelled { background: #dc3545; color: white; }
-        
         .btn {
             padding: 3px 8px;
             border: none;
@@ -144,10 +127,7 @@ $total_revenue = $pdo->query("SELECT SUM(total_price) FROM orders")->fetchColumn
             text-decoration: none;
             display: inline-block;
         }
-        .btn-edit { background: #28a745; color: white; }
         .btn-delete { background: #dc3545; color: white; }
-        
-        select { padding: 3px 5px; font-size: 0.75rem; }
         
         @media (max-width: 768px) {
             th, td { font-size: 0.7rem; padding: 5px; }
@@ -171,36 +151,22 @@ $total_revenue = $pdo->query("SELECT SUM(total_price) FROM orders")->fetchColumn
     <div class="section">
         <h2>Заказы</h2>
         <table>
-            <thead><tr><th>ID</th><th>Клиент</th><th>Телефон</th><th>Состав</th><th>Сумма</th><th>Статус</th><th>Дата</th><th></th></tr></thead>
+            <thead><tr><th>ID</th><th>Клиент</th><th>Телефон</th><th>Состав</th><th>Сумма</th><th>Дата</th><th></th></tr></thead>
             <tbody>
                 <?php foreach ($orders as $order): ?>
                 <tr>
                     <td><?= $order['id'] ?></td>
                     <td><?= htmlspecialchars($order['full_name'] ?? '-') ?></td>
                     <td><?= htmlspecialchars($order['phone'] ?? '-') ?></td>
-                    <td><?= htmlspecialchars(substr($order['items'] ?? '', 0, 30)) ?></td>
+                    <td><?= htmlspecialchars(substr($order['items'] ?? '', 0, 40)) ?></td>
                     <td><?= number_format($order['total_price'], 0, '', ' ') ?> ₽</td>
-                    <td>
-                        <span class="status status-<?= $order['status'] ?>">
-                            <?= $order['status'] == 'new' ? 'Новый' : ($order['status'] == 'processing' ? 'В обработке' : ($order['status'] == 'completed' ? 'Завершён' : 'Отменён')) ?>
-                        </span>
-                    </td>
                     <td><?= $order['created_at'] ?></td>
-                    <td>
-                        <form method="POST" style="display:inline;">
-                            <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                            <select name="status">
-                                <option value="new" <?= $order['status'] == 'new' ? 'selected' : '' ?>>Новый</option>
-                                <option value="processing" <?= $order['status'] == 'processing' ? 'selected' : '' ?>>В обработке</option>
-                                <option value="completed" <?= $order['status'] == 'completed' ? 'selected' : '' ?>>Завершён</option>
-                                <option value="cancelled" <?= $order['status'] == 'cancelled' ? 'selected' : '' ?>>Отменён</option>
-                            </select>
-                            <button type="submit" name="update_status" class="btn btn-edit">OK</button>
-                        </form>
-                        <a href="?delete_order=<?= $order['id'] ?>" class="btn btn-delete" onclick="return confirm('Удалить?')">Удалить</a>
-                    </td>
+                    <td><a href="?delete_order=<?= $order['id'] ?>" class="btn btn-delete" onclick="return confirm('Удалить заказ?')">Удалить</a></td>
                 </tr>
                 <?php endforeach; ?>
+                <?php if (empty($orders)): ?>
+                <tr><td colspan="7" style="text-align:center;">Заказов пока нет</td></tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
@@ -218,9 +184,12 @@ $total_revenue = $pdo->query("SELECT SUM(total_price) FROM orders")->fetchColumn
                     <td><?= htmlspecialchars($user['email'] ?? '-') ?></td>
                     <td><?= htmlspecialchars($user['login']) ?></td>
                     <td><?= $user['created_at'] ?></td>
-                    <td><a href="?delete_user=<?= $user['id'] ?>" class="btn btn-delete" onclick="return confirm('Удалить?')">Удалить</a></td>
+                    <td><a href="?delete_user=<?= $user['id'] ?>" class="btn btn-delete" onclick="return confirm('Удалить пользователя?')">Удалить</a></td>
                 </tr>
                 <?php endforeach; ?>
+                <?php if (empty($users)): ?>
+                <tr><td colspan="7" style="text-align:center;">Пользователей пока нет</td></tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
