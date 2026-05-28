@@ -29,6 +29,8 @@ if (!isset($_SERVER['PHP_AUTH_USER']) ||
 }
 
 // ========== ОБРАБОТКА ДЕЙСТВИЙ ==========
+
+// Удаление заказа
 if (isset($_GET['delete_order']) && is_numeric($_GET['delete_order'])) {
     $id = (int)$_GET['delete_order'];
     $pdo->prepare("DELETE FROM orders WHERE id = ?")->execute([$id]);
@@ -36,6 +38,7 @@ if (isset($_GET['delete_order']) && is_numeric($_GET['delete_order'])) {
     exit;
 }
 
+// Удаление пользователя
 if (isset($_GET['delete_user']) && is_numeric($_GET['delete_user'])) {
     $id = (int)$_GET['delete_user'];
     $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$id]);
@@ -43,8 +46,32 @@ if (isset($_GET['delete_user']) && is_numeric($_GET['delete_user'])) {
     exit;
 }
 
+// Редактирование заказа
+if (isset($_POST['edit_order'])) {
+    $order_id = (int)$_POST['order_id'];
+    $items = $_POST['items'];
+    $total_price = (float)$_POST['total_price'];
+    
+    $pdo->prepare("UPDATE orders SET items = ?, total_price = ? WHERE id = ?")->execute([$items, $total_price, $order_id]);
+    header('Location: admin.php');
+    exit;
+}
+
+// Редактирование пользователя
+if (isset($_POST['edit_user'])) {
+    $user_id = (int)$_POST['user_id'];
+    $full_name = $_POST['full_name'];
+    $phone = $_POST['phone'];
+    $email = $_POST['email'];
+    $address = $_POST['address'];
+    
+    $pdo->prepare("UPDATE users SET full_name = ?, phone = ?, email = ?, address = ? WHERE id = ?")->execute([$full_name, $phone, $email, $address, $user_id]);
+    header('Location: admin.php');
+    exit;
+}
+
 // ========== ДАННЫЕ ==========
-$users = $pdo->query("SELECT id, full_name, phone, email, login, created_at FROM users ORDER BY id DESC")->fetchAll();
+$users = $pdo->query("SELECT id, full_name, phone, email, login, address, created_at FROM users ORDER BY id DESC")->fetchAll();
 $orders = $pdo->query("
     SELECT o.*, u.full_name, u.phone 
     FROM orders o 
@@ -54,6 +81,24 @@ $orders = $pdo->query("
 $total_users = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $total_orders = $pdo->query("SELECT COUNT(*) FROM orders")->fetchColumn();
 $total_revenue = $pdo->query("SELECT SUM(total_price) FROM orders")->fetchColumn();
+
+// Получаем ID для редактирования
+$edit_order_id = isset($_GET['edit_order_id']) ? (int)$_GET['edit_order_id'] : null;
+$edit_user_id = isset($_GET['edit_user_id']) ? (int)$_GET['edit_user_id'] : null;
+
+$edit_order_data = null;
+if ($edit_order_id) {
+    $stmt = $pdo->prepare("SELECT * FROM orders WHERE id = ?");
+    $stmt->execute([$edit_order_id]);
+    $edit_order_data = $stmt->fetch();
+}
+
+$edit_user_data = null;
+if ($edit_user_id) {
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->execute([$edit_user_id]);
+    $edit_user_data = $stmt->fetch();
+}
 ?>
 
 <!DOCTYPE html>
@@ -127,11 +172,27 @@ $total_revenue = $pdo->query("SELECT SUM(total_price) FROM orders")->fetchColumn
             text-decoration: none;
             display: inline-block;
         }
+        .btn-edit { background: #28a745; color: white; }
         .btn-delete { background: #dc3545; color: white; }
+        .btn-save { background: #28a745; color: white; margin-right: 5px; }
+        .btn-cancel { background: #6c757d; color: white; }
+        
+        .edit-form {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        .edit-form h3 { margin-bottom: 15px; color: #dc3545; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: inline-block; width: 100px; font-weight: bold; }
+        .form-group input, .form-group textarea { width: 300px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
         
         @media (max-width: 768px) {
             th, td { font-size: 0.7rem; padding: 5px; }
             .stat-card .num { font-size: 1.2rem; }
+            .form-group input, .form-group textarea { width: 100%; }
         }
     </style>
 </head>
@@ -148,10 +209,64 @@ $total_revenue = $pdo->query("SELECT SUM(total_price) FROM orders")->fetchColumn
         <div class="stat-card"><div class="num"><?= number_format($total_revenue ?? 0, 0, '', ' ') ?> ₽</div><div class="label">Выручка</div></div>
     </div>
     
+    <!-- Форма редактирования заказа -->
+    <?php if ($edit_order_data): ?>
+    <div class="edit-form">
+        <h3>✏️ Редактирование заказа #<?= $edit_order_data['id'] ?></h3>
+        <form method="POST">
+            <input type="hidden" name="order_id" value="<?= $edit_order_data['id'] ?>">
+            <div class="form-group">
+                <label>Состав заказа:</label>
+                <textarea name="items" rows="3" style="width:400px;"><?= htmlspecialchars($edit_order_data['items']) ?></textarea>
+            </div>
+            <div class="form-group">
+                <label>Сумма (₽):</label>
+                <input type="number" name="total_price" step="0.01" value="<?= $edit_order_data['total_price'] ?>">
+            </div>
+            <div class="form-group">
+                <label></label>
+                <button type="submit" name="edit_order" class="btn btn-save">💾 Сохранить</button>
+                <a href="admin.php" class="btn btn-cancel">Отмена</a>
+            </div>
+        </form>
+    </div>
+    <?php endif; ?>
+    
+    <!-- Форма редактирования пользователя -->
+    <?php if ($edit_user_data): ?>
+    <div class="edit-form">
+        <h3>✏️ Редактирование пользователя #<?= $edit_user_data['id'] ?></h3>
+        <form method="POST">
+            <input type="hidden" name="user_id" value="<?= $edit_user_data['id'] ?>">
+            <div class="form-group">
+                <label>Имя:</label>
+                <input type="text" name="full_name" value="<?= htmlspecialchars($edit_user_data['full_name']) ?>" required>
+            </div>
+            <div class="form-group">
+                <label>Телефон:</label>
+                <input type="text" name="phone" value="<?= htmlspecialchars($edit_user_data['phone']) ?>" required>
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" name="email" value="<?= htmlspecialchars($edit_user_data['email']) ?>">
+            </div>
+            <div class="form-group">
+                <label>Адрес:</label>
+                <textarea name="address" rows="2" style="width:400px;"><?= htmlspecialchars($edit_user_data['address']) ?></textarea>
+            </div>
+            <div class="form-group">
+                <label></label>
+                <button type="submit" name="edit_user" class="btn btn-save">💾 Сохранить</button>
+                <a href="admin.php" class="btn btn-cancel">Отмена</a>
+            </div>
+        </form>
+    </div>
+    <?php endif; ?>
+    
     <div class="section">
         <h2>Заказы</h2>
         <table>
-            <thead><tr><th>ID</th><th>Клиент</th><th>Телефон</th><th>Состав</th><th>Сумма</th><th>Дата</th><th></th></tr></thead>
+            <thead><tr><th>ID</th><th>Клиент</th><th>Телефон</th><th>Состав</th><th>Сумма</th><th>Дата</th><th>Действия</th></tr></thead>
             <tbody>
                 <?php foreach ($orders as $order): ?>
                 <tr>
@@ -161,7 +276,10 @@ $total_revenue = $pdo->query("SELECT SUM(total_price) FROM orders")->fetchColumn
                     <td><?= htmlspecialchars(substr($order['items'] ?? '', 0, 40)) ?></td>
                     <td><?= number_format($order['total_price'], 0, '', ' ') ?> ₽</td>
                     <td><?= $order['created_at'] ?></td>
-                    <td><a href="?delete_order=<?= $order['id'] ?>" class="btn btn-delete" onclick="return confirm('Удалить заказ?')">Удалить</a></td>
+                    <td>
+                        <a href="?edit_order_id=<?= $order['id'] ?>" class="btn btn-edit">✏️ Ред.</a>
+                        <a href="?delete_order=<?= $order['id'] ?>" class="btn btn-delete" onclick="return confirm('Удалить заказ?')">🗑️ Удал.</a>
+                    </td>
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($orders)): ?>
@@ -174,7 +292,9 @@ $total_revenue = $pdo->query("SELECT SUM(total_price) FROM orders")->fetchColumn
     <div class="section">
         <h2>Пользователи</h2>
         <table>
-            <thead><tr><th>ID</th><th>Имя</th><th>Телефон</th><th>Email</th><th>Логин</th><th>Дата</th><th></th></tr></thead>
+            <thead>
+                <tr><th>ID</th><th>Имя</th><th>Телефон</th><th>Email</th><th>Логин</th><th>Адрес</th><th>Дата</th><th>Действия</th></tr>
+            </thead>
             <tbody>
                 <?php foreach ($users as $user): ?>
                 <tr>
@@ -183,12 +303,16 @@ $total_revenue = $pdo->query("SELECT SUM(total_price) FROM orders")->fetchColumn
                     <td><?= htmlspecialchars($user['phone']) ?></td>
                     <td><?= htmlspecialchars($user['email'] ?? '-') ?></td>
                     <td><?= htmlspecialchars($user['login']) ?></td>
+                    <td><?= htmlspecialchars(substr($user['address'] ?? '-', 0, 30)) ?></td>
                     <td><?= $user['created_at'] ?></td>
-                    <td><a href="?delete_user=<?= $user['id'] ?>" class="btn btn-delete" onclick="return confirm('Удалить пользователя?')">Удалить</a></td>
+                    <td>
+                        <a href="?edit_user_id=<?= $user['id'] ?>" class="btn btn-edit">✏️ Ред.</a>
+                        <a href="?delete_user=<?= $user['id'] ?>" class="btn btn-delete" onclick="return confirm('Удалить пользователя?')">🗑️ Удал.</a>
+                    </td>
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($users)): ?>
-                <tr><td colspan="7" style="text-align:center;">Пользователей пока нет</td></tr>
+                <tr><td colspan="8" style="text-align:center;">Пользователей пока нет</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
